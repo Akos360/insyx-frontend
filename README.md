@@ -1,24 +1,81 @@
-# Insyx - frontend
+# Insyx Frontend
 
-React + TypeScript frontend for an interactive bibliometric/scientometric exploration app.
-The UI is designed as an “explorer shell” (graph canvas + linked panels) that consumes a backend API serving subgraphs, metadata, and aggregates.
+Frontend application for the Insyx project, built with React and TypeScript.
 
-## Tech Stack
-- React + TypeScript (Vite)
-- TanStack React Query (data fetching + caching)
-- Axios (HTTP client)
-- Zod (runtime validation of API responses)
+## Technology Stack
+- `React`: Component-based UI framework.
+- `TypeScript`: Type safety for UI and API integration.
+- `Vite`: Fast dev server and production bundler.
+- `React Router`: Client-side routing (`/`, `/explore`).
+- `Axios`: HTTP client for backend communication.
+- `TanStack React Query`: Async state, caching, and request lifecycle handling.
+- `Bootstrap`: Base UI styling utilities.
+- `Zod`: Runtime schema validation support.
+- `Nginx` + `Docker`: Production static hosting in containers.
 
-## Prerequisites
-- Node.js (LTS recommended)
-- Running backend API
+## What This App Does
+- Frontend routes: `/` and `/explore`.
+- Backend API calls via `VITE_API_BASE_URL` (example: `http://localhost:3000`).
 
-## Install dependencies:
-```bash
-$ npm install
+## Project Structure
+```text
+insyx-frontend/
+|-- src/
+|   |-- main.tsx
+|   |-- App.tsx
+|   |-- App.css
+|   |-- api/
+|   |   |-- client.ts
+|   |   `-- papers.ts
+|   |-- pages/
+|   |   |-- HomePage.tsx
+|   |   |-- ExplorePage.tsx
+|   |   `-- explore.css
+|   `-- ui/
+|       |-- Pane.tsx
+|       `-- pane.css
+|-- public/
+|-- nginx.conf
+|-- Dockerfile
+|-- docker-compose.yml
+|-- package.json
+`-- vite.config.ts
 ```
 
-## Run the dev server:
+## Run With Docker (Recommended)
+From the frontend repository root:
+
 ```bash
-$ npm run dev
+docker compose up --build
+```
+
+Frontend will be available at `http://localhost:8080`.
+
+Stop containers:
+
+```bash
+docker compose down
+```
+
+Important:
+- Backend must be running on `http://localhost:3000`.
+- Compose builds frontend with `VITE_API_BASE_URL=http://localhost:3000`.
+
+## Run Without Docker
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run dev server:
+
+```bash
+npm run dev
+```
+
+Build production bundle:
+
+```bash
+npm run build
 ```

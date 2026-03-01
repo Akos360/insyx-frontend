@@ -1,7 +1,15 @@
 import { api } from "./client";
 
-export async function fetchPaper(id: string) {
-  const res = await api.get(`/papers/${id}`);
+export type Paper = {
+  id: string;
+  title: string;
+  year: number;
+  authors: string[];
+  abstract: string;
+};
+
+export async function getPaper(id: string) {
+  const res = await api.get<Paper>(`/papers/${id}`);
   return res.data;
 }
 

@@ -1,10 +1,17 @@
 import './App.css'
-import ExplorerPage from "./pages/ExplorerPage";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import ExplorePage from "./pages/ExplorePage";
 
-function App() {
+export default function App() {
 
-  return <ExplorerPage />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/explore" element={<ExplorePage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 
 }
-
-export default App
