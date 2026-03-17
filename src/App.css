@@ -1,42 +1,62 @@
+:root {
+  --shadow-grey: #161925ff;
+  --twilight-indigo: #23395bff;
+  --rich-cerulean: #406e8eff;
+  --powder-blue: #8ea8c3ff;
+  --frozen-water: #cbf7edff;
+
+  --app-bg: #071018;
+  --app-bg-elevated: #0b1520;
+  --app-surface: #111b28;
+  --app-surface-soft: #182435;
+  --app-surface-strong: #223754;
+  --app-text: #ecf6ff;
+  --app-text-muted: #9db5ca;
+  --app-border: #29415f;
+  --app-border-strong: #406e8e;
+  --app-accent: #8ea8c3;
+  --app-accent-strong: #cbf7ed;
+  --app-button-bg: #cbf7ed;
+  --app-button-bg-hover: #8ea8c3;
+  --app-button-text: #081018;
+  --app-overlay: rgba(4, 8, 14, 0.56);
+  --app-input-bg: rgba(7, 16, 24, 0.68);
+  --app-shadow: rgba(2, 7, 13, 0.34);
+}
+
+body[data-theme="light"] {
+  --app-bg: #f7fbff;
+  --app-bg-elevated: #ffffff;
+  --app-surface: #ffffff;
+  --app-surface-soft: #edf5fb;
+  --app-surface-strong: #dbe8f4;
+  --app-text: #161925;
+  --app-text-muted: #406e8e;
+  --app-border: #bfd0e0;
+  --app-border-strong: #8ea8c3;
+  --app-accent: #406e8e;
+  --app-accent-strong: #23395b;
+  --app-button-bg: #edf5fb;
+  --app-button-bg-hover: #dbe8f4;
+  --app-button-text: #161925;
+  --app-overlay: rgba(142, 168, 195, 0.16);
+  --app-input-bg: #ffffff;
+  --app-shadow: rgba(35, 57, 91, 0.08);
+}
+
 #root {
-  max-width: 1280px;
-  /* margin: 0 auto; */
-  /* padding: 2rem; */
-  text-align: center;
+  min-height: 100vh;
+  width: 100%;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+* {
+  box-sizing: border-box;
 }
 
-/* @keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-} */
-
-/* @media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-} */
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #000000;
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  color: var(--app-text);
+  background: var(--app-bg);
+  transition: background-color 180ms ease, color 180ms ease;
 }

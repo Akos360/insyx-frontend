@@ -1,0 +1,23 @@
+.appShell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.appShellBody {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.appShellContent {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+@media (max-width: 768px) {
+  .appShellBody {
+    flex-direction: column;
+  }
+}

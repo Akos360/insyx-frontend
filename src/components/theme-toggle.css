@@ -1,0 +1,70 @@
+.themeToggle {
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 12px 30px var(--app-shadow);
+}
+
+.themeToggleTrack {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  padding: 3px;
+  background: var(--app-surface-strong);
+  display: grid;
+  align-items: center;
+}
+
+.themeToggleThumb {
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  background: var(--app-accent-strong);
+  border-radius: 999px;
+  box-shadow: 0 4px 12px var(--app-shadow);
+  transition: transform 180ms ease;
+}
+
+.themeToggleThumbLight {
+  transform: translateX(18px);
+}
+
+.themeToggleIcons {
+  position: absolute;
+  inset: 0;
+  padding: 0 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.themeToggleIcon {
+  font-size: 12px;
+  transition: color 180ms ease, opacity 180ms ease;
+}
+
+.themeToggleIconDark {
+  color: #f4f7fb;
+}
+
+.themeToggleIconLight {
+  color: #7a4a00;
+}
+
+.themeToggleIconInactive {
+  color: var(--app-text-muted);
+  opacity: 0.55;
+}
+
+.themeToggleCompact {
+  background: var(--app-bg-elevated);
+}

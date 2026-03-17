@@ -1,0 +1,33 @@
+.topNavbar {
+  height: 72px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--app-bg-elevated);
+  border-bottom: 1px solid var(--app-border);
+  color: var(--app-text);
+}
+
+.topNavbarBrand {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--app-accent);
+}
+
+.topNavbarMeta {
+  color: var(--app-text-muted);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+  .topNavbar {
+    height: auto;
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}

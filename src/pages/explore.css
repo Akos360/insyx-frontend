@@ -1,57 +1,97 @@
 .exploreRoot {
-
-  height: 100vh;
-  width: 100vw;
+  min-height: calc(100vh - 72px);
+  width: 100%;
   display: flex;
-  /* flex-direction: column; */
-  font-family: system-ui, sans-serif;
+  background: var(--app-bg);
 }
 
-.exploreTopbar {
-  height: 0px;
-  /* display: flex; */
-  /* align-items: center; */
-  /* justify-content: space-between; */
-  /* padding: 0 14px; */
-  border-bottom: 1px solid #e5e5e5;
-  background: #fff;
-}
-
-.exploreTopbarTitle {
-  font-weight: 800;
-}
-
-.btn {
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  background: #fff;
-  cursor: pointer;
-  color: #000;
-}
-
-.grid {
+.exploreGrid {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 10px;
-  padding: 10px;
-  background: #f6f6f6;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
-/* each cell fills its grid slot */
-.cell {
-  min-height: 0; /* important so children can scroll */
+.exploreCard {
+  border: 1px solid var(--app-border);
+  background: linear-gradient(145deg, var(--app-surface) 0%, var(--app-surface-soft) 100%);
+  color: var(--app-text);
+  box-shadow: 0 20px 44px var(--app-shadow);
+  position: relative;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  padding: 18px;
+  font: inherit;
 }
 
-/* hide non-maximized panes */
-.hidden {
-  display: none;
+.exploreCardGlobe {
+  padding: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top, rgba(142, 168, 195, 0.18), transparent 38%),
+    linear-gradient(145deg, var(--app-surface) 0%, var(--app-surface-soft) 100%);
 }
 
-/* maximized pane occupies full grid */
-.max {
-  grid-column: 1 / -1;
-  grid-row: 1 / -1;
+.exploreCardGlobePreview {
+  position: absolute;
+  inset: 0;
+}
+
+.exploreCardGlobePreview .globeViewport {
+  height: 100%;
+  border: 0;
+}
+
+.exploreCardGlobeFallback {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(203, 247, 237, 0.14), transparent 32%),
+    linear-gradient(145deg, var(--app-surface) 0%, var(--app-surface-soft) 100%);
+}
+
+.exploreCardLabel {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  font-size: clamp(0.9rem, 1vw, 1.15rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.exploreCardAction {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--app-border);
+  color: var(--app-button-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background: var(--app-button-bg);
+  font-size: 1rem;
+}
+
+.exploreCardAction:focus-visible {
+  outline: 3px solid var(--app-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .exploreRoot {
+    padding: 12px;
+  }
+
+  .exploreGrid {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, minmax(180px, 1fr));
+    gap: 12px;
+  }
 }

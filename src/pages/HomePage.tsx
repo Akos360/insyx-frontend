@@ -1,34 +1,85 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ThemeToggle from "../components/ThemeToggle";
+import "./home.css";
 
 export default function HomePage() {
+  const navigate = useNavigate();
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const isRegister = mode === "register";
+
   return (
-    <div className="container-fluid text-center" style={{ margin:0 , padding:0 }}>
-      <div className="row min-vh-100" style={{ margin:0, display: "fluid" }}>
-        <div className="col-md-8 d-flex flex-column justify-content-center align-items-center text-center" style={{background: "#9849e8", padding:0 }}>
-          <h1 style={{ margin: 0 }}>Insyx Science-of-Science Explorer</h1>
-          <p>
+    <main className="homePage">
+      <section className="homeHero">
+        <div className="homeHeroContent">
+          <p className="homeEyebrow">Insyx Explorer</p>
+          <h1 className="homeTitle">Insyx Science-of-Science Explorer</h1>
+          <p className="homeDescription">
             Interactive web application for exploring bibliometric and scientometric data:
             citation networks, collaboration structures, metadata panels, and linked views.
           </p>
         </div>
-        <div className="col-md-4 justify-content-center d-flex flex-column align-items-center" style={{background: "#ffffff", padding:0 }}>
-          <Link
-            to="/explore"
-            style={{
-              height: 50 ,
-              display: "inline-block",
-              padding: "12px 16px",
-              borderRadius: 10,
-              border: "1px solid #ccc",
-              textDecoration: "none",
-              fontWeight: 600,
+
+        <div className="homeThemeToggleWrap">
+          <ThemeToggle compact />
+        </div>
+      </section>
+
+      <aside className="homePanel">
+        <div className="homePanelCard">
+          <p className="homePanelLabel">{isRegister ? "Register" : "Login"}</p>
+          <h2 className="homeFormTitle">
+            {isRegister ? "Create your account" : "Welcome back"}
+          </h2>
+
+          <form
+            className="homeForm"
+            onSubmit={(event) => {
+              event.preventDefault();
+              navigate("/explore");
             }}
           >
-            Start Exploring →
-          </Link>
+            {isRegister ? (
+              <label className="homeField">
+                <span className="homeFieldLabel">Name</span>
+                <input type="text" name="name" className="homeInput" />
+              </label>
+            ) : null}
 
+            <label className="homeField">
+              <span className="homeFieldLabel">Email</span>
+              <input type="email" name="email" className="homeInput" />
+            </label>
+
+            <label className="homeField">
+              <span className="homeFieldLabel">Password</span>
+              <input type="password" name="password" className="homeInput" />
+            </label>
+
+            {isRegister ? (
+              <label className="homeField">
+                <span className="homeFieldLabel">Confirm Password</span>
+                <input type="password" name="confirmPassword" className="homeInput" />
+              </label>
+            ) : null}
+
+            <button type="submit" className="homeCta">
+              {isRegister ? "Register" : "Login"}
+            </button>
+          </form>
+
+          <p className="homeSwitchText">
+            {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
+            <button
+              type="button"
+              className="homeSwitchButton"
+              onClick={() => setMode(isRegister ? "login" : "register")}
+            >
+              {isRegister ? "Login" : "Register"}
+            </button>
+          </p>
         </div>
-      </div>
-    </div>
+      </aside>
+    </main>
   );
 }

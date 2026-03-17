@@ -1,0 +1,105 @@
+.sideNav {
+  width: 240px;
+  min-height: 0;
+  padding: 20px 14px;
+  background: var(--app-surface-soft);
+  border-right: 1px solid var(--app-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.sideNavBackButton {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 14px;
+  padding: 0;
+  border: 1px solid var(--app-border);
+  background: var(--app-button-bg);
+  color: var(--app-button-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.sideNavBackIcon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.sideNavBackButton:hover {
+  background: var(--app-button-bg-hover);
+  border-color: var(--app-border-strong);
+  transform: translateY(-1px);
+}
+
+.sideNavBackButton:focus-visible {
+  outline: 3px solid var(--app-accent);
+  outline-offset: 2px;
+}
+
+.sideNavLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sideNavLink {
+  display: flex;
+  width: 100%;
+  padding: 12px 14px;
+  color: var(--app-text);
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.sideNavLink:hover {
+  background: var(--app-overlay);
+}
+
+.sideNavLinkActive {
+  background: var(--app-surface-strong);
+  color: var(--app-text);
+}
+
+.sideNavFooter {
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+.sideNavThemeToggle {
+  margin-bottom: 10px;
+}
+
+.sideNavThemeToggle .themeToggle {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.sideNavSettingsLink {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .sideNav {
+    width: 100%;
+    padding: 12px;
+    border-right: 0;
+    border-bottom: 1px solid var(--app-border);
+  }
+
+  .sideNavLinks {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .sideNavFooter {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+}
