@@ -1,0 +1,52 @@
+.graphPage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--app-bg);
+}
+
+.graphPanel {
+  display: flex;
+  flex-direction: column;
+  height: 320px;
+  border-right: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface);
+}
+
+.graphPanel:nth-child(even) {
+  border-right: none;
+}
+
+.graphPanel--tall {
+  height: 440px;
+}
+
+.graphPanelHeader {
+  padding: 10px 14px 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+}
+
+.graphPanelBody {
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 768px) {
+  .graphPage {
+    grid-template-columns: 1fr;
+  }
+
+  .graphPanel {
+    border-right: none;
+    height: 280px;
+  }
+
+  .graphPanel--tall {
+    height: 380px;
+  }
+}

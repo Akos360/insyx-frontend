@@ -1,30 +1,17 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import "./sidebar.css";
-import { BsGearFill, BsSkipStartFill } from "react-icons/bs";
-import ThemeToggle from "./ThemeToggle";
+import { BsGearFill } from "react-icons/bs";
 
 const items = [
-  { to: "/explore", label: "Explore" },
   { to: "/search", label: "Search" },
   { to: "/explore-net", label: "Explore Net" },
-  { to: "/paper", label: "Paper" },
+  { to: "/graph", label: "Graph" },
   { to: "/globe", label: "Globe" },
 ];
 
 export default function Sidebar() {
-  const navigate = useNavigate();
-
   return (
     <aside className="sideNav">
-      <button
-        type="button"
-        className="sideNavBackButton"
-        onClick={() => navigate(-1)}
-        aria-label="Go back"
-      >
-        <BsSkipStartFill className="sideNavBackIcon" />
-      </button>
-
       <nav className="sideNavLinks" aria-label="Primary">
         {items.map((item) => (
           <NavLink
@@ -40,9 +27,6 @@ export default function Sidebar() {
       </nav>
 
       <div className="sideNavFooter">
-        <div className="sideNavThemeToggle">
-          <ThemeToggle compact />
-        </div>
         <NavLink
           to="/settings"
           className={({ isActive }) =>

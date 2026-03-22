@@ -1,5 +1,4 @@
 import { useTheme } from "../theme/useTheme";
-import { BsMoonStarsFill, BsSunFill } from "react-icons/bs";
 import "./theme-toggle.css";
 
 type ThemeToggleProps = {
@@ -18,13 +17,8 @@ export default function ThemeToggle({ compact = false }: ThemeToggleProps) {
       aria-label={`Switch to ${isLight ? "dark" : "light"} mode`}
     >
       <span className="themeToggleTrack" aria-hidden="true">
-        <span className="themeToggleIcons">
-          <BsMoonStarsFill className={isLight ? "themeToggleIcon themeToggleIconInactive" : "themeToggleIcon themeToggleIconDark"} />
-          <BsSunFill className={isLight ? "themeToggleIcon themeToggleIconLight" : "themeToggleIcon themeToggleIconInactive"} />
-        </span>
         <span className={isLight ? "themeToggleThumb themeToggleThumbLight" : "themeToggleThumb"} />
       </span>
-      <span className="themeToggleLabel">{isLight ? "Light Mode" : "Dark Mode"}</span>
     </button>
   );
 }

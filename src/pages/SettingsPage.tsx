@@ -30,6 +30,9 @@ export default function SettingsPage() {
         </form>
 
         <div className="settingsFooter">
+          <button type="submit" className="settingsSaveButton">
+            Save
+          </button>
           <button type="button" className="settingsLogoutButton" onClick={() => navigate("/")}>
             Logout
           </button>

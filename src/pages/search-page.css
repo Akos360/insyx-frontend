@@ -1,66 +1,210 @@
 .searchPage {
-  min-height: calc(100vh - 72px);
-  padding: 24px;
-}
-
-.searchPageCard {
-  min-height: calc(100vh - 120px);
-  padding: 24px;
-  border: 1px solid var(--app-border);
-  background: linear-gradient(145deg, var(--app-surface) 0%, var(--app-surface-soft) 100%);
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  box-shadow: 0 18px 40px var(--app-shadow);
+  height: 100%;
+  background: var(--app-bg);
 }
 
-.searchPageHeader {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.searchPageEyebrow {
-  margin: 0;
-  color: var(--app-text-muted);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.searchPageTitle {
-  margin: 0;
-  color: var(--app-text);
-  font-size: clamp(2rem, 4vw, 4rem);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.searchPageContent {
-  flex: 1;
-  display: grid;
-  gap: 16px;
-}
-
-.searchPageBlock {
-  min-height: 120px;
-  padding: 18px;
-  border: 1px solid var(--app-border);
-  background: var(--app-bg-elevated);
-  color: var(--app-text-muted);
+.searchToolbar {
   display: flex;
   align-items: center;
+  gap: 10px;
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.searchInputWrap {
+  flex: 1;
+  min-width: 200px;
+  max-width: 600px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchInputIcon {
+  position: absolute;
+  left: 10px;
+  font-size: 0.85rem;
+  color: var(--app-text-muted);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  height: 34px;
+  padding: 0 12px 0 32px;
+  border: 1px solid var(--app-border);
+  background: var(--app-input-bg);
+  color: var(--app-text);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.searchInput:focus {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 1px;
+}
+
+.searchSelect {
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid var(--app-border);
+  background: var(--app-input-bg);
+  color: var(--app-text);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.searchSelect:focus {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 1px;
+}
+
+.searchYearInput {
+  width: 120px;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid var(--app-border);
+  background: var(--app-input-bg);
+  color: var(--app-text);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.searchYearInput:focus {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 1px;
+}
+
+.searchOaLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--app-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.searchOaLabel input {
+  accent-color: var(--app-accent);
+  cursor: pointer;
+}
+
+.searchCount {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
+  white-space: nowrap;
+}
+
+.searchTableWrap {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.searchStatus {
+  padding: 32px 20px;
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}
+
+.searchTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.searchTh {
+  position: sticky;
+  top: 0;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+  background: var(--app-surface);
+  border-bottom: 1px solid var(--app-border);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.searchTh:hover {
+  color: var(--app-text);
+}
+
+.searchThTitle {
+  width: 36%;
+}
+
+.searchThNum {
+  text-align: right;
+}
+
+.searchSortIdle {
+  margin-left: 4px;
+  font-size: 0.7rem;
+  color: var(--app-border-strong);
+  vertical-align: middle;
+}
+
+.searchSortActive {
+  margin-left: 4px;
+  font-size: 0.7rem;
+  color: var(--app-accent);
+  vertical-align: middle;
+}
+
+.searchTr {
+  cursor: pointer;
+  border-bottom: 1px solid var(--app-border);
+  transition: background 100ms ease;
+}
+
+.searchTr:hover {
+  background: var(--app-overlay);
+}
+
+.searchTd {
+  padding: 10px 14px;
+  color: var(--app-text);
+  vertical-align: middle;
+}
+
+.searchTdTitle {
   font-weight: 600;
 }
 
+.searchTdMuted {
+  color: var(--app-text-muted);
+  font-size: 0.82rem;
+}
+
+.searchTdNum {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--app-text-muted);
+  font-size: 0.82rem;
+}
+
 @media (max-width: 768px) {
-  .searchPage {
-    padding: 12px;
+  .searchToolbar {
+    padding: 10px 12px;
   }
 
-  .searchPageCard {
-    min-height: auto;
-    padding: 16px;
+  .searchInput {
+    min-width: 100%;
+  }
+
+  .searchTable {
+    font-size: 0.8rem;
   }
 }

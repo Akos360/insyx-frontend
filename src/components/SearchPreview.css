@@ -1,0 +1,106 @@
+.searchPreview {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.searchPreviewBar {
+  background: var(--app-bg-elevated);
+}
+
+.searchPreviewInputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchPreviewInputIcon {
+  position: absolute;
+  left: 9px;
+  font-size: 0.75rem;
+  color: var(--app-text-muted);
+  pointer-events: none;
+}
+
+.searchPreviewInput {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px 0 28px;
+  border: transparent;
+  background: var(--app-input-bg);
+  color: var(--app-text);
+  font: inherit;
+  font-size: 0.78rem;
+}
+
+.searchPreviewInput:focus {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 1px;
+}
+
+.searchPreviewTableWrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.searchPreviewTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.searchPreviewTh {
+  position: sticky;
+  top: 0;
+  padding: 5px 10px;
+  text-align: left;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+  background: var(--app-surface);
+  border-bottom: 1px solid var(--app-border);
+  white-space: nowrap;
+}
+
+.searchPreviewThTitle {
+  width: 40%;
+}
+
+.searchPreviewThR {
+  text-align: right;
+  width: 30%;
+}
+
+.searchPreviewTr {
+  border-bottom: 1px solid var(--app-border);
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.searchPreviewTr:hover {
+  background: var(--app-overlay);
+}
+
+.searchPreviewTd {
+  padding: 8px 10px;
+  color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+}
+
+.searchPreviewTdTitle {
+  font-weight: 500;
+}
+
+.searchPreviewTdR {
+  text-align: right;
+  color: var(--app-text-muted);
+  font-variant-numeric: tabular-nums;
+}

@@ -25,11 +25,41 @@
   font: inherit;
 }
 
+.exploreCardNet {
+  padding: 0;
+  overflow: hidden;
+}
+
+.exploreCardSearch {
+  padding: 0;
+  overflow: hidden;
+}
+
+
+.exploreCardGraph {
+  padding: 0;
+  overflow: hidden;
+}
+
+.exploreCardGraph .exploreCardLabel {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 1;
+}
+
+.exploreCardNet .exploreCardLabel {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 1;
+}
+
 .exploreCardGlobe {
   padding: 0;
   overflow: hidden;
   background:
-    radial-gradient(circle at top, rgba(142, 168, 195, 0.18), transparent 38%),
+    radial-gradient(circle at top, var(--app-surface-strong) 0%, transparent 50%),
     linear-gradient(145deg, var(--app-surface) 0%, var(--app-surface-soft) 100%);
 }
 
@@ -47,35 +77,39 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at center, rgba(203, 247, 237, 0.14), transparent 32%),
+    radial-gradient(circle at center, var(--app-surface-strong) 0%, transparent 45%),
     linear-gradient(145deg, var(--app-surface) 0%, var(--app-surface-soft) 100%);
 }
 
 .exploreCardLabel {
   position: absolute;
-  top: 18px;
-  left: 18px;
-  font-size: clamp(0.9rem, 1vw, 1.15rem);
-  font-weight: 700;
+  top: 5px;
+  left: 5px;
+  font-size: 15px; 
+  font-weight: 400;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .exploreCardAction {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 0px;
+  right: 0px;
   z-index: 1;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--app-border);
-  color: var(--app-button-text);
+  width: 25px;
+  height: 25px;
+  color: var(--app-text-muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  background: var(--app-button-bg);
+  background: rgba(128, 128, 128, 0.15);
   font-size: 1rem;
+  transition: background 150ms ease;
+}
+
+.exploreCard:hover .exploreCardAction {
+  background: rgba(128, 128, 128, 0.28);
 }
 
 .exploreCardAction:focus-visible {

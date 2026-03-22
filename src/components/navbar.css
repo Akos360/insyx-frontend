@@ -9,17 +9,68 @@
   color: var(--app-text);
 }
 
+.topNavbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topNavbarBack {
+  border: none;
+  background: transparent;
+  color: var(--app-text-muted);
+  font-size: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0;
+  transition: color 140ms ease;
+}
+
+.topNavbarBack:hover {
+  color: var(--app-text);
+}
+
+.topNavbarBack:focus-visible {
+  outline: none;
+  color: var(--app-accent);
+}
+
 .topNavbarBrand {
   font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--app-accent);
+  text-decoration: none;
 }
 
 .topNavbarMeta {
   color: var(--app-text-muted);
   font-size: 0.95rem;
+}
+
+.topNavbarActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topNavbarSwagger {
+  padding: 6px 14px;
+  border: 1px solid var(--app-border);
+  color: var(--app-text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.topNavbarSwagger:hover {
+  color: var(--app-accent);
+  border-color: var(--app-accent);
 }
 
 @media (max-width: 768px) {

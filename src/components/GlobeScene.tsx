@@ -25,7 +25,7 @@ type GlobeSceneProps = {
 };
 
 const points: GlobePoint[] = [
-  { name: "Berlin", lat: 52.52, lng: 13.405, size: 0.34 },
+  { name: "Berlin", lat: 52.52, lng: 13.405, size: 0.9 },
   { name: "New York", lat: 40.7128, lng: -74.006, size: 0.38 },
   { name: "Tokyo", lat: 35.6762, lng: 139.6503, size: 0.32 },
   { name: "Sydney", lat: -33.8688, lng: 151.2093, size: 0.3 },
@@ -73,7 +73,7 @@ export default function GlobeScene({ compact = false }: GlobeSceneProps) {
       theme === "light"
         ? {
             atmosphereColor: "#406e8e",
-            backgroundColor: "rgba(247, 251, 255, 0)",
+            backgroundColor: "#dce8f4",
             globeImageUrl: dayTexture,
             pointsColor: "#23395b",
             arcColor: ["#23395b", "#8ea8c3"] as [string, string],

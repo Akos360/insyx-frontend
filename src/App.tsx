@@ -4,6 +4,7 @@ import AppShell from "./components/AppShell";
 import ExploreNetPage from "./pages/ExploreNetPage";
 import HomePage from "./pages/HomePage";
 import PaperPage from "./pages/PaperPage";
+import GraphPage from "./pages/GraphPage";
 import ExplorePage from "./pages/ExplorePage";
 import SearchPage from "./pages/SearchPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -21,7 +22,8 @@ export default function App() {
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/explore-net" element={<ExploreNetPage />} />
-            <Route path="/paper" element={<PaperPage />} />
+            <Route path="/graph" element={<GraphPage />} />
+            <Route path="/paper/:id" element={<PaperPage />} />
             <Route
               path="/globe"
               element={(

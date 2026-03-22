@@ -1,5 +1,6 @@
 .appShell {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -8,13 +9,16 @@
   flex: 1;
   display: flex;
   min-height: 0;
+  overflow: hidden;
 }
 
 .appShellContent {
   flex: 1;
   min-width: 0;
   min-height: 0;
+  overflow-y: auto;
 }
+
 
 @media (max-width: 768px) {
   .appShellBody {
