@@ -43,7 +43,7 @@ export default function ExplorePage() {
               <SearchPreview />
             ) : null}
 
-            {section.to !== "/search" && (
+            {section.to !== "/search" && section.to !== "/graph" && (
               <span className="exploreCardLabel">{section.label}</span>
             )}
 

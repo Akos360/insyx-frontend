@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { getPaper, type Paper } from "../api/papers";
+import { getAuthorsByPaper } from "../api/authors";
 import "./paper-page.css";
 
 export default function PaperPage() {
@@ -9,6 +11,12 @@ export default function PaperPage() {
   const [paper, setPaper] = useState<Paper | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { data: authorRecords = [] } = useQuery({
+    queryKey: ['authors', 'paper', id],
+    queryFn: () => getAuthorsByPaper(id!),
+    enabled: !!id,
+  });
 
   useEffect(() => {
     if (!id) return;
@@ -53,7 +61,22 @@ export default function PaperPage() {
           <div className="paperPageBlock paperPageMeta">
             <div className="paperPageMetaGrid">
               {paper.publicationYear && <div><span className="metaLabel">Year</span><span>{paper.publicationYear}</span></div>}
-              {paper.authors && <div><span className="metaLabel">Authors</span><span>{paper.authors}</span></div>}
+              {authorRecords.length > 0 ? (
+                <div><span className="metaLabel">Authors</span>
+                  <span style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 8px' }}>
+                    {authorRecords.map((a, i) => (
+                      <span key={a.authorId}>
+                        <Link to={`/author/${a.authorId}`} style={{ color: 'var(--app-accent, #6aaccc)', textDecoration: 'none' }}>
+                          {a.displayName ?? a.authorId}
+                        </Link>
+                        {i < authorRecords.length - 1 && ','}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+              ) : paper.authors ? (
+                <div><span className="metaLabel">Authors</span><span>{paper.authors}</span></div>
+              ) : null}
               {paper.sourceName && <div><span className="metaLabel">Source</span><span>{paper.sourceName}</span></div>}
               {paper.citedByCount != null && <div><span className="metaLabel">Citations</span><span>{paper.citedByCount.toLocaleString()}</span></div>}
               {paper.primaryTopic && <div><span className="metaLabel">Topic</span><span>{paper.primaryTopic}</span></div>}

@@ -4,6 +4,7 @@ import { BsGearFill } from "react-icons/bs";
 
 const items = [
   { to: "/search", label: "Search" },
+  { to: "/authors", label: "Authors" },
   { to: "/explore-net", label: "Explore Net" },
   { to: "/graph", label: "Graph" },
   { to: "/globe", label: "Globe" },

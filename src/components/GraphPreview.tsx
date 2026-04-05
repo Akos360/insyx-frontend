@@ -1,50 +1,58 @@
 import ReactECharts from 'echarts-for-react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
+import { getAllPapers } from '../api/papers';
+import { CHART_LIST } from '../charts/chartList';
+import { buildChartOption, makeThemeColors } from '../charts/buildChartOption';
 import { useTheme } from '../theme/useTheme';
-
-const FIELDS = ['ML', 'NLP', 'CV', 'Optimization', 'Gen AI'];
 
 export default function GraphPreview() {
   const { theme } = useTheme();
+  const [idx, setIdx] = useState(0);
 
-  const option = useMemo(() => {
-    const isDark = theme === 'dark';
-    const colors = isDark
-      ? ['#cbf7ed', '#8ea8c3', '#6aaccc', '#406e8e', '#4a7fa8']
-      : ['#23395b', '#406e8e', '#6aaccc', '#8ea8c3', '#9db5ca'];
-    const muted = isDark ? '#9db5ca' : '#406e8e';
-    const border = isDark ? '#29415f' : '#bfd0e0';
+  // Shared query — React Query deduplicates this with GraphPage's identical query key
+  const { data: papers = [] } = useQuery({
+    queryKey: ['papers'],
+    queryFn: getAllPapers,
+    staleTime: 5 * 60 * 1000,
+  });
 
-    const axis = {
-      axisLine: { lineStyle: { color: border } },
-      axisLabel: { color: muted, fontSize: 10 },
-      splitLine: { lineStyle: { color: border } },
-      axisTick: { show: false },
-    };
-
-    return {
-      backgroundColor: 'transparent',
+  const options = useMemo(() => {
+    const ct = makeThemeColors(theme === 'dark');
+    return CHART_LIST.map(c => ({
+      ...(buildChartOption(c.id, papers, ct) as object),
       animation: false,
-      grid: { left: 32, right: 8, top: 10, bottom: 26 },
-      xAxis: { type: 'category', data: FIELDS, ...axis },
-      yAxis: { type: 'value', ...axis },
-      series: [{
-        type: 'bar',
-        data: [7, 5, 3, 2, 3],
-        itemStyle: {
-          color: (p: any) => colors[p.dataIndex % colors.length],
-          borderRadius: [3, 3, 0, 0],
-        },
-        barMaxWidth: 40,
-      }],
-    };
-  }, [theme]);
+    }));
+  }, [papers, theme]);
+
+  const prev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIdx(i => (i - 1 + CHART_LIST.length) % CHART_LIST.length);
+  };
+  const next = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIdx(i => (i + 1) % CHART_LIST.length);
+  };
 
   return (
-    <ReactECharts
-      option={option}
-      notMerge
-      style={{ position: 'absolute', inset: '28px 0 0 0', width: '100%', height: 'calc(100% - 28px)' }}
-    />
+    <>
+      <div className="graphPreviewBar">
+        <button className="graphPreviewArrow" onClick={prev} aria-label="Previous chart">
+          <BsChevronLeft size={11} />
+        </button>
+        <span className="graphPreviewTitle">{CHART_LIST[idx].title}</span>
+        <button className="graphPreviewArrow" onClick={next} aria-label="Next chart">
+          <BsChevronRight size={11} />
+        </button>
+      </div>
+
+      <ReactECharts
+        key={idx}
+        option={options[idx]}
+        notMerge
+        style={{ position: 'absolute', inset: '28px 0 0 0', width: '100%', height: 'calc(100% - 28px)' }}
+      />
+    </>
   );
 }

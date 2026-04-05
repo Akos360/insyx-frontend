@@ -22,18 +22,59 @@
 }
 
 .graphPanelHeader {
-  padding: 10px 14px 0;
+  padding: 10px 6px 0 14px;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--app-text-muted);
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.graphPanelExpand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: var(--app-text-muted);
+  opacity: 0;
+  text-decoration: none;
+  border-radius: 3px;
+  transition: opacity 120ms ease, background 120ms ease;
+  flex-shrink: 0;
+}
+
+.graphPanel:hover .graphPanelExpand {
+  opacity: 1;
+}
+
+.graphPanelExpand:hover {
+  background: rgba(128,128,128,0.18);
+  color: var(--app-text);
 }
 
 .graphPanelBody {
   flex: 1;
   min-height: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+.graphPanelStatus {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
+}
+
+.graphPanelStatusError {
+  color: #e05c5c;
 }
 
 @media (max-width: 768px) {

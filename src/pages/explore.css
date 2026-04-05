@@ -41,11 +41,51 @@
   overflow: hidden;
 }
 
-.exploreCardGraph .exploreCardLabel {
+/* GraphPreview carousel bar */
+.graphPreviewBar {
   position: absolute;
-  top: 5px;
-  left: 5px;
-  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 30px; /* leave room for the expand icon */
+  height: 28px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  z-index: 2;
+}
+
+.graphPreviewTitle {
+  flex: 1;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.graphPreviewArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--app-text-muted);
+  cursor: pointer;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.graphPreviewArrow:hover {
+  background: rgba(128,128,128,0.18);
+  color: var(--app-text);
 }
 
 .exploreCardNet .exploreCardLabel {

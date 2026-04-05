@@ -1,0 +1,241 @@
+.scPage {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 72px);
+  background: var(--app-bg);
+  overflow: hidden;
+}
+
+/* ── top bar ── */
+.scTopBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  height: 44px;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface);
+  flex-shrink: 0;
+}
+
+.scBack {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
+  text-decoration: none;
+  transition: color 120ms ease;
+  white-space: nowrap;
+}
+.scBack:hover { color: var(--app-text); }
+
+.scChartNav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.scChartTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.scNavBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--app-text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: background 120ms ease, color 120ms ease;
+}
+.scNavBtn:hover {
+  background: rgba(128,128,128,0.18);
+  color: var(--app-text);
+}
+
+.scGridBtn {
+  display: flex;
+  align-items: center;
+  color: var(--app-text-muted);
+  text-decoration: none;
+  padding: 4px 6px;
+  border-radius: 3px;
+  transition: background 120ms ease, color 120ms ease;
+}
+.scGridBtn:hover {
+  background: rgba(128,128,128,0.18);
+  color: var(--app-text);
+}
+
+/* ── body ── */
+.scBody {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── chart area ── */
+.scChartArea {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  padding: 16px;
+  display: flex;
+  align-items: stretch;
+}
+
+.scStatus {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+}
+
+.scStatusError { color: #e05c5c; }
+
+.scCount {
+  position: absolute;
+  bottom: 8px;
+  left: 16px;
+  font-size: 0.7rem;
+  color: var(--app-text-muted);
+  opacity: 0.6;
+}
+
+/* ── filter sidebar ── */
+.scFilters {
+  width: 220px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--app-border);
+  background: var(--app-surface);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.scFilterSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scFilterLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* year range inputs */
+.scYearRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.scYearInput {
+  width: 68px;
+  padding: 4px 6px;
+  background: var(--app-bg);
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
+  color: var(--app-text);
+  font-size: 0.8rem;
+}
+.scYearInput:focus {
+  outline: none;
+  border-color: var(--app-accent);
+}
+.scYearSep {
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+}
+
+/* radio buttons */
+.scRadioLabel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  color: var(--app-text);
+  cursor: pointer;
+}
+
+/* field checkboxes */
+.scFilterSectionFields { flex: 1; min-height: 0; }
+
+.scFieldList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  max-height: 240px;
+}
+
+.scCheckLabel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  color: var(--app-text);
+  cursor: pointer;
+}
+
+.scClearBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.65rem;
+  color: var(--app-accent, #6aaccc);
+  padding: 0;
+  text-transform: lowercase;
+  letter-spacing: 0;
+}
+
+.scResetBtn {
+  margin-top: auto;
+  padding: 7px 12px;
+  background: none;
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+.scResetBtn:hover {
+  border-color: var(--app-text-muted);
+  color: var(--app-text);
+}
+
+/* ── responsive ── */
+@media (max-width: 640px) {
+  .scBody { flex-direction: column; }
+  .scFilters {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--app-border);
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    max-height: 180px;
+  }
+  .scFilterSectionFields { min-width: 100%; }
+  .scChartArea { min-height: 300px; }
+}

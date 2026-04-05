@@ -1,0 +1,424 @@
+/* ── Authors list page ───────────────────────────────────────────────────── */
+
+.authorsRoot {
+  padding: 24px 28px;
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.authorsTopBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.authorsTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--app-text);
+  margin: 0;
+}
+
+.authorsCount {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--app-text-muted);
+  margin-left: 8px;
+}
+
+.authorsControls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.authorsSearch {
+  padding: 6px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-size: 0.82rem;
+  width: 240px;
+}
+.authorsSearch:focus { outline: none; border-color: var(--app-accent, #6aaccc); }
+
+.authorsSort {
+  padding: 6px 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.authorsStatus {
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+  padding: 16px 0;
+}
+.authorsStatusError { color: #e05c5c; }
+
+.authorsList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.authorsCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+  text-decoration: none;
+  color: var(--app-text);
+  transition: border-color 140ms ease, background 140ms ease;
+}
+.authorsCard:hover {
+  border-color: var(--app-accent, #6aaccc);
+  background: var(--app-surface-soft);
+}
+
+.authorsFlag {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  width: 28px;
+  text-align: center;
+}
+
+.authorsCardBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.authorsName {
+  font-size: 0.92rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.authorsInstitution {
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.authorsCardMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.authorsPaperBadge {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--app-bg);
+  border: 1px solid var(--app-border);
+  color: var(--app-text-muted);
+  white-space: nowrap;
+}
+
+.authorsOrcidDot {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #a6ce39;
+  color: #fff;
+  letter-spacing: 0.03em;
+}
+
+/* ── Single author page ──────────────────────────────────────────────────── */
+
+.authorPage {
+  padding: 20px 28px 40px;
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.authorStatus {
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+  padding: 24px 0;
+}
+
+.authorBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
+  text-decoration: none;
+  transition: color 120ms ease;
+  margin-bottom: 4px;
+}
+.authorBack:hover { color: var(--app-text); }
+
+/* header */
+.authorHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.authorHeaderMain {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.authorFlag {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.authorName {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--app-text);
+  margin: 0 0 4px;
+}
+
+.authorInstitution {
+  font-size: 0.88rem;
+  color: var(--app-text-muted);
+  margin: 0;
+}
+
+.authorCountry {
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
+  margin: 2px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.authorOrcid {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #a6ce39;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
+  transition: background 120ms ease;
+  white-space: nowrap;
+}
+.authorOrcid:hover { background: rgba(166, 206, 57, 0.12); }
+
+.authorOrcidId {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: #a6ce39;
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+}
+
+/* stats */
+.authorStats {
+  display: flex;
+  gap: 28px;
+  padding: 14px 18px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+}
+
+.authorStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.authorStatValue {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.authorStatLabel {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--app-text-muted);
+}
+
+/* fields */
+.authorFieldRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.authorFieldTag {
+  font-size: 0.74rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  color: var(--app-text-muted);
+}
+
+/* section */
+.authorSection { display: flex; flex-direction: column; gap: 8px; }
+
+.authorSectionTitle {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+/* institutions */
+.authorInstitutionList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.authorInstitutionTag {
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  color: var(--app-text);
+}
+
+/* body layout */
+.authorBody {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* papers list */
+.authorPaperList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.authorPaperItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+  text-decoration: none;
+  color: var(--app-text);
+  transition: border-color 140ms ease, background 140ms ease;
+}
+.authorPaperItem:hover {
+  border-color: var(--app-accent, #6aaccc);
+  background: var(--app-surface-soft);
+}
+
+.authorPaperMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.authorPaperYear {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--app-text-muted);
+}
+
+.authorPaperField {
+  font-size: 0.7rem;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: var(--app-bg);
+  border: 1px solid var(--app-border);
+  color: var(--app-text-muted);
+}
+
+.authorPaperOa {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: #2d7a4a;
+  color: #fff;
+  letter-spacing: 0.04em;
+}
+
+.authorPaperTitle {
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.authorPaperSource {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.75rem;
+  color: var(--app-text-muted);
+}
+
+.authorPaperCites {
+  font-weight: 600;
+  color: var(--app-text-muted);
+}
+
+/* charts */
+.authorCharts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.authorChartBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+}
+
+/* responsive */
+@media (max-width: 720px) {
+  .authorBody {
+    grid-template-columns: 1fr;
+  }
+  .authorsRoot,
+  .authorPage {
+    padding: 16px;
+  }
+}
