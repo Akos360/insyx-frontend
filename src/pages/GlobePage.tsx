@@ -1,4 +1,4 @@
-import GlobeScene from "../components/GlobeScene";
+import MapGlobe from "../components/MapGlobe";
 import "./globe-page.css";
 
 const points = [
@@ -22,7 +22,7 @@ export default function GlobePage() {
     <main className="globePage">
       <section className="globePageCard">
         <div className="globePageContent">
-          <GlobeScene />
+          <MapGlobe />
 
           <aside className="globePageSidebar">
             <div className="globePageBlock">

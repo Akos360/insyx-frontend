@@ -103,23 +103,6 @@
     linear-gradient(145deg, var(--app-surface) 0%, var(--app-surface-soft) 100%);
 }
 
-.exploreCardGlobePreview {
-  position: absolute;
-  inset: 0;
-}
-
-.exploreCardGlobePreview .globeViewport {
-  height: 100%;
-  border: 0;
-}
-
-.exploreCardGlobeFallback {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at center, var(--app-surface-strong) 0%, transparent 45%),
-    linear-gradient(145deg, var(--app-surface) 0%, var(--app-surface-soft) 100%);
-}
 
 .exploreCardLabel {
   position: absolute;

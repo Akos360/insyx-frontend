@@ -6,7 +6,7 @@ import NetPreview from "../components/NetPreview";
 import GraphPreview from "../components/GraphPreview";
 import SearchPreview from "../components/SearchPreview";
 
-const GlobeScene = lazy(() => import("../components/GlobeScene"));
+const MapGlobe = lazy(() => import("../components/MapGlobe"));
 
 const sections = [
   { id: "panel-1", label: "Search", to: "/search" },
@@ -31,9 +31,7 @@ export default function ExplorePage() {
           <div key={section.id} className={cardClass(section.to)}>
             {section.to === "/globe" ? (
               <Suspense fallback={<div className="exploreCardGlobeFallback" />}>
-                <div className="exploreCardGlobePreview">
-                  <GlobeScene compact />
-                </div>
+                <MapGlobe compact />
               </Suspense>
             ) : section.to === "/explore-net" ? (
               <NetPreview />

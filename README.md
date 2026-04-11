@@ -7,71 +7,79 @@ React SPA for Insyx — a Science-of-Science Explorer. Allows browsing, searchin
 - `React 19` — component-based UI
 - `TypeScript` — type safety
 - `Vite` — dev server and production bundler
-- `React Router` — client-side routing
+- `React Router v7` — client-side routing
 - `TanStack React Query` — async data fetching and caching
 - `Axios` — HTTP client
 - `ECharts` (`echarts-for-react`) — 2D interactive charts
-- `echarts-gl` — 3D bar charts
-- `react-globe.gl` + `Three.js` — 3D collaboration globe
+- `echarts-gl` — 3D charts (bar3D, surface3D, scatter3D)
+- `MapLibre GL JS` — vector tile globe with full zoom quality
 - `React Icons` — icon library
 - `ESLint` — linting
 - `Nginx` + `Docker` — production static hosting
 
+## Environment Variables
+
+Copy `.env.example` to `.env` and fill in:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Description |
+|---|---|
+| `VITE_API_BASE_URL` | Backend base URL (default: `http://localhost:3000`) |
+| `VITE_MAPTILER_KEY` | MapTiler API key — free at [maptiler.com](https://maptiler.com) |
+
 ## Routes
 
 | Path | Page | Description |
-|------|------|-------------|
-| `/` | `HomePage` | Landing / login screen |
-| `/explore` | `ExplorePage` | Paper list with chart preview panel |
-| `/explore/:id` | `PaperPage` | Single paper details with author links |
-| `/search` | `SearchPage` | Full-text paper search |
-| `/graph` | `GraphPage` | All charts overview (6 panels) |
-| `/graph/:chartId` | `SingleChartPage` | Single chart with filter sidebar |
-| `/globe` | `GlobePage` | 3D globe of author collaborations (lazy-loaded) |
-| `/explore-net` | `ExploreNetPage` | Citation network graph |
-| `/authors` | `AuthorsPage` | Searchable author list |
-| `/author/:authorId` | `AuthorPage` | Author profile with stats and charts |
-| `/settings` | `SettingsPage` | App settings (theme etc.) |
+|---|---|---|
+| `/` | `HomePage` | Landing screen |
+| `/explore` | `ExplorePage` | Overview cards for all modules |
+| `/search` | `SearchPage` | Paper search with filters and sortable table |
+| `/paper/:id` | `PaperPage` | Single paper detail (metadata, abstract, keywords) |
+| `/graph` | `GraphPage` | 2D and 3D charts (bar, histogram, scatter, surface) |
+| `/globe` | `GlobePage` | Zoomable vector globe with city labels and arcs |
+| `/explore-net` | `ExploreNetPage` | Citation network graph (animated placeholder) |
+| `/settings` | `SettingsPage` | Account preferences |
 
 ## Project Structure
 
 ```text
 insyx-frontend/
 ├── src/
-│   ├── main.tsx
 │   ├── App.tsx
 │   ├── api/
-│   │   ├── client.ts        # Axios instance (VITE_API_BASE_URL)
-│   │   ├── papers.ts        # Papers API calls + types
-│   │   └── authors.ts       # Authors API calls + types + countryFlag()
-│   ├── charts/
-│   │   ├── chartList.ts     # Shared chart metadata list
-│   │   └── buildChartOption.ts  # ECharts option builders from Paper[] data
+│   │   ├── client.ts            # Axios instance (VITE_API_BASE_URL)
+│   │   └── papers.ts            # Papers API calls + types
 │   ├── components/
-│   │   ├── AppShell.tsx     # Shared layout (Navbar + Sidebar)
-│   │   └── GraphPreview.tsx # Carousel chart preview widget
+│   │   ├── AppShell.tsx         # Shared layout (Navbar + Sidebar)
+│   │   ├── Navbar.tsx
+│   │   ├── Sidebar.tsx
+│   │   ├── MapGlobe.tsx         # MapLibre GL globe (vector tiles)
+│   │   ├── GraphPreview.tsx     # Chart preview for explore card
+│   │   ├── NetPreview.tsx       # Animated SVG network preview
+│   │   ├── SearchPreview.tsx    # Functional search preview for explore card
+│   │   └── ThemeToggle.tsx
 │   ├── pages/
 │   │   ├── HomePage.tsx
 │   │   ├── ExplorePage.tsx
-│   │   ├── PaperPage.tsx
 │   │   ├── SearchPage.tsx
+│   │   ├── PaperPage.tsx
 │   │   ├── GraphPage.tsx
-│   │   ├── SingleChartPage.tsx
 │   │   ├── GlobePage.tsx
 │   │   ├── ExploreNetPage.tsx
-│   │   ├── AuthorsPage.tsx
-│   │   ├── AuthorPage.tsx
 │   │   └── SettingsPage.tsx
 │   └── theme/
-│       ├── ThemeContext.tsx  # Light/dark theme provider
+│       ├── ThemeContext.tsx      # Light/dark theme provider
 │       └── useTheme.ts
 ├── public/
+├── .env.example
 ├── index.html
 ├── nginx.conf
 ├── Dockerfile
 ├── docker-compose.yml
-├── package.json
-└── vite.config.ts
+└── package.json
 ```
 
 ## Run Without Docker
@@ -86,7 +94,9 @@ npm run preview   # preview production build locally
 ## Run With Docker
 
 ```bash
-docker compose up --build
+# Fresh build (no cache)
+docker compose build --no-cache
+docker compose up -d
 ```
 
 Frontend served at `http://localhost:8080`. Backend must be running on `http://localhost:3000`.
