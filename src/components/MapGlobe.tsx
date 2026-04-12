@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { MdMyLocation } from "react-icons/md";
 import { useTheme } from "../theme/useTheme";
 import "./MapGlobe.css";
 
@@ -170,6 +171,10 @@ export default function MapGlobe({ compact = false }: MapGlobeProps) {
   const themeRef = useRef(theme);
   themeRef.current = theme;
 
+  const [isGlobe, setIsGlobe] = useState(true);
+  const isGlobeRef = useRef(isGlobe);
+  isGlobeRef.current = isGlobe;
+
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -181,22 +186,17 @@ export default function MapGlobe({ compact = false }: MapGlobeProps) {
       center: [13.405, 30],
       zoom: compact ? 0.6 : 1.5,
       attributionControl: false,
-      interactive: !compact,
     });
 
-    if (!compact) {
-      map.addControl(
-        new maplibregl.NavigationControl({ showCompass: true }),
-        "top-right",
-      );
-    }
+    map.addControl(
+      new maplibregl.NavigationControl({ showCompass: true }),
+      "top-right",
+    );
 
-    map.on("load", () => {
-      map.setProjection({ type: "globe" });
-      addLayers(map, isDark);
-    });
-
+    // style.load fires on every style load (initial + setStyle calls),
+    // so this is the single place to apply projection and layers.
     map.on("style.load", () => {
+      map.setProjection({ type: isGlobeRef.current ? "globe" : "mercator" });
       addLayers(map, themeRef.current === "dark");
     });
 
@@ -205,16 +205,50 @@ export default function MapGlobe({ compact = false }: MapGlobeProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Theme change: swap style only; setStyle preserves camera (center/zoom/bearing/pitch).
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
     map.setStyle(theme === "dark" ? STYLE_DARK : STYLE_LIGHT);
   }, [theme]);
 
+  // Projection toggle: apply when user switches modes, but only if style is ready.
+  // On first mount the style isn't loaded yet; style.load handler handles that case.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+    map.setProjection({ type: isGlobe ? "globe" : "mercator" });
+  }, [isGlobe]);
+
+  function handleRecenter() {
+    const map = mapRef.current;
+    if (!map) return;
+    map.flyTo({
+      center: [13.405, 30],
+      zoom: compact ? 0.6 : 1.5,
+      bearing: 0,
+      pitch: 0,
+      duration: 800,
+    });
+  }
+
   return (
-    <div
-      ref={containerRef}
-      className={compact ? "mapGlobe mapGlobeCompact" : "mapGlobe"}
-    />
+    <div className={compact ? "mapGlobeWrapper mapGlobeWrapperCompact" : "mapGlobeWrapper"}>
+      <div ref={containerRef} className="mapGlobe" />
+      <button
+        className="globeBtn globeProjectionToggle"
+        onClick={() => setIsGlobe((g) => !g)}
+        title={isGlobe ? "Switch to 2D map" : "Switch to 3D globe"}
+      >
+        {isGlobe ? "2D" : "3D"}
+      </button>
+      <button
+        className="globeBtn globeResetBtn"
+        onClick={handleRecenter}
+        title="Reset to default view"
+      >
+        <MdMyLocation size={14} />
+      </button>
+    </div>
   );
 }

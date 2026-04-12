@@ -22,6 +22,7 @@
   --app-overlay: rgba(4, 8, 14, 0.56);
   --app-input-bg: rgba(7, 16, 24, 0.68);
   --app-shadow: rgba(2, 7, 13, 0.34);
+  --app-icon-filter: invert(1);
 }
 
 body[data-theme="light"] {
@@ -42,6 +43,7 @@ body[data-theme="light"] {
   --app-overlay: rgba(142, 168, 195, 0.16);
   --app-input-bg: #ffffff;
   --app-shadow: rgba(35, 57, 91, 0.08);
+  --app-icon-filter: none;
 }
 
 #root {

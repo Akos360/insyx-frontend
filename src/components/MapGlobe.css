@@ -1,18 +1,23 @@
+.mapGlobeWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.mapGlobeWrapperCompact {
+  position: absolute;
+  inset: 0;
+}
+
 .mapGlobe {
   width: 100%;
   height: 100%;
   background: var(--app-bg);
 }
 
-.mapGlobeCompact {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
 /* hide maplibre attribution logo in compact view */
-.mapGlobeCompact .maplibregl-ctrl-bottom-left,
-.mapGlobeCompact .maplibregl-ctrl-bottom-right {
+.mapGlobeWrapperCompact .maplibregl-ctrl-bottom-left,
+.mapGlobeWrapperCompact .maplibregl-ctrl-bottom-right {
   display: none;
 }
 
@@ -35,3 +40,40 @@
 .maplibregl-ctrl-group button span {
   filter: var(--app-icon-filter, none);
 }
+
+/* Shared styles for custom map buttons (2D/3D toggle, recenter) */
+.globeBtn {
+  position: absolute;
+  right: 10px;
+  width: 29px;
+  height: 29px;
+  background: var(--app-surface-strong);
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
+  color: var(--app-text);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 2;
+}
+
+.globeBtn:hover {
+  background: var(--app-overlay);
+}
+
+/* Non-compact: NavigationControl sits at default top: 10px (~89px tall).
+   Buttons start immediately below with a small gap. */
+.globeProjectionToggle { top: 110px; }
+.globeResetBtn         { top: 141px; }
+
+/* Compact: push MapLibre's ctrl group below the 25px expand button in the card corner. */
+.mapGlobeWrapperCompact .maplibregl-ctrl-top-right {
+  top: 30px;
+}
+.mapGlobeWrapperCompact .globeProjectionToggle { top: 130px; }
+.mapGlobeWrapperCompact .globeResetBtn         { top: 161px; }
