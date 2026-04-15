@@ -1,5 +1,5 @@
 import "./NetPreview.css";
-import { useTheme } from "../theme/useTheme";
+import { useTheme } from "../../theme/useTheme";
 
 const DARK_COLORS = [
   "#cbf7ed", "#8ea8c3", "#9db5ca", "#406e8e",

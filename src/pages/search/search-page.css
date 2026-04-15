@@ -103,6 +103,82 @@
   white-space: nowrap;
 }
 
+.searchSelectionBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: var(--app-surface-strong);
+  border-bottom: 1px solid var(--app-border);
+  flex-shrink: 0;
+}
+
+.searchSelectionCount {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--app-accent);
+}
+
+.searchSelectionAction {
+  height: 28px;
+  padding: 0 14px;
+  border: 1px solid var(--app-accent);
+  background: var(--app-accent);
+  color: #fff;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 3px;
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.searchSelectionClear {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--app-border);
+  background: transparent;
+  color: var(--app-text-muted);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.searchSelectionClear:hover {
+  background: var(--app-overlay);
+  color: var(--app-text);
+}
+
+.searchThCheck {
+  width: 40px;
+  text-align: center;
+  padding: 10px 8px;
+}
+
+.searchTdCheck {
+  width: 40px;
+  text-align: center;
+  padding: 10px 8px;
+}
+
+.searchTdCheck input,
+.searchThCheck input {
+  accent-color: var(--app-accent);
+  cursor: pointer;
+  width: 15px;
+  height: 15px;
+}
+
+.searchTrSelected {
+  background: color-mix(in srgb, var(--app-accent) 8%, transparent);
+}
+
+.searchTrSelected:hover {
+  background: color-mix(in srgb, var(--app-accent) 14%, transparent);
+}
+
 .searchTableWrap {
   flex: 1;
   overflow-y: auto;

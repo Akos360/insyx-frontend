@@ -2,10 +2,10 @@ import ReactECharts from 'echarts-for-react';
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
-import { getAllPapers } from '../api/papers';
-import { CHART_LIST } from '../charts/chartList';
-import { buildChartOption, makeThemeColors } from '../charts/buildChartOption';
-import { useTheme } from '../theme/useTheme';
+import { getAllPapers } from '../../api/papers';
+import { CHART_LIST } from '../../charts/chartList';
+import { buildChartOption, makeThemeColors } from '../../charts/buildChartOption';
+import { useTheme } from '../../theme/useTheme';
 
 export default function GraphPreview() {
   const { theme } = useTheme();

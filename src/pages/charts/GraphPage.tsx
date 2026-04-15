@@ -5,10 +5,10 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BsArrowsAngleExpand } from 'react-icons/bs';
-import { getAllPapers } from '../api/papers';
-import { useTheme } from '../theme/useTheme';
-import { CHART_LIST } from '../charts/chartList';
-import { buildChartOption, makeThemeColors } from '../charts/buildChartOption';
+import { getAllPapers } from '../../api/papers';
+import { useTheme } from '../../theme/useTheme';
+import { CHART_LIST } from '../../charts/chartList';
+import { buildChartOption, makeThemeColors } from '../../charts/buildChartOption';
 import './graph-page.css';
 
 const PERIODS = ['2012–15', '2016–19', '2020–23'] as const;

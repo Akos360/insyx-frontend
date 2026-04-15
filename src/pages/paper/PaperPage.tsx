@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getPaper, type Paper } from "../api/papers";
-import { getAuthorsByPaper } from "../api/authors";
+import { getPaper, type Paper } from "../../api/papers";
+import { getAuthorsByPaper } from "../../api/authors";
 import "./paper-page.css";
 
 export default function PaperPage() {

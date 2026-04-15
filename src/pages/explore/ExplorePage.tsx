@@ -2,11 +2,11 @@ import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import "./explore.css";
 import { BsArrowsAngleExpand } from "react-icons/bs";
-import NetPreview from "../components/NetPreview";
-import GraphPreview from "../components/GraphPreview";
-import SearchPreview from "../components/SearchPreview";
+import NetPreview from "../../components/network/NetPreview";
+import GraphPreview from "../../components/charts/GraphPreview";
+import SearchPreview from "../../components/search/SearchPreview";
 
-const MapGlobe = lazy(() => import("../components/MapGlobe"));
+const MapGlobe = lazy(() => import("../../components/globe/MapGlobe"));
 
 const sections = [
   { id: "panel-1", label: "Search", to: "/search" },

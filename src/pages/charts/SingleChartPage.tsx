@@ -3,10 +3,10 @@ import { useMemo, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BsArrowLeft, BsGrid } from 'react-icons/bs';
-import { getAllPapers, type Paper } from '../api/papers';
-import { CHART_LIST } from '../charts/chartList';
-import { buildChartOption, makeThemeColors } from '../charts/buildChartOption';
-import { useTheme } from '../theme/useTheme';
+import { getAllPapers, type Paper } from '../../api/papers';
+import { CHART_LIST } from '../../charts/chartList';
+import { buildChartOption, makeThemeColors } from '../../charts/buildChartOption';
+import { useTheme } from '../../theme/useTheme';
 import './single-chart-page.css';
 
 // ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ThemeToggle from "../components/ThemeToggle";
+import ThemeToggle from "../../components/layout/ThemeToggle";
 import "./home.css";
 
 export default function HomePage() {

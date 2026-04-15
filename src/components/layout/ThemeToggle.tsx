@@ -1,4 +1,4 @@
-import { useTheme } from "../theme/useTheme";
+import { useTheme } from "../../theme/useTheme";
 import "./theme-toggle.css";
 
 type ThemeToggleProps = {

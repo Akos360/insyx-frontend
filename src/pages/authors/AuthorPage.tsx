@@ -3,9 +3,9 @@ import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BsArrowLeft, BsBoxArrowUpRight } from 'react-icons/bs';
-import { getAuthorRecords, countryFlag } from '../api/authors';
-import { makeThemeColors } from '../charts/buildChartOption';
-import { useTheme } from '../theme/useTheme';
+import { getAuthorRecords, countryFlag } from '../../api/authors';
+import { makeThemeColors } from '../../charts/buildChartOption';
+import { useTheme } from '../../theme/useTheme';
 import './author-page.css';
 
 export default function AuthorPage() {

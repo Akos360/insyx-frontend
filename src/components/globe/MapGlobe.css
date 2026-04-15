@@ -70,6 +70,8 @@
    Buttons start immediately below with a small gap. */
 .globeProjectionToggle { top: 110px; }
 .globeResetBtn         { top: 141px; }
+.globeScreenshotBtn    { top: 172px; }
+.globeFullscreenBtn    { top: 203px; }
 
 /* Compact: push MapLibre's ctrl group below the 25px expand button in the card corner. */
 .mapGlobeWrapperCompact .maplibregl-ctrl-top-right {

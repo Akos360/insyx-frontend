@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsChevronUp, BsChevronDown, BsSearch } from "react-icons/bs";
-import { getAllPapers, type Paper } from "../api/papers";
+import { getAllPapers, type Paper } from "../../api/papers";
 import "./search-page.css";
 
 type SortKey = "title" | "publicationYear" | "citedByCount" | "field" | "authors";
@@ -25,6 +25,8 @@ export default function SearchPage() {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const selectAllRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,6 +64,14 @@ export default function SearchPage() {
     });
   }, [papers, query, fieldFilter, yearFrom, yearTo, oaOnly, sortKey, sortDir]);
 
+  // Keep the select-all checkbox indeterminate when only some rows are selected.
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate =
+        selectedIds.size > 0 && selectedIds.size < results.length;
+    }
+  }, [selectedIds, results]);
+
   function handleSort(key: SortKey) {
     if (key === sortKey) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -69,6 +79,23 @@ export default function SearchPage() {
       setSortKey(key);
       setSortDir("asc");
     }
+  }
+
+  function toggleSelect(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    setSelectedIds(
+      selectedIds.size === results.length
+        ? new Set()
+        : new Set(results.map((p) => p.id))
+    );
   }
 
   const cols: { key: SortKey; label: string; num?: boolean }[] = [
@@ -135,6 +162,23 @@ export default function SearchPage() {
         <span className="searchCount">{results.length} result{results.length !== 1 ? "s" : ""}</span>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="searchSelectionBar">
+          <span className="searchSelectionCount">
+            {selectedIds.size} paper{selectedIds.size !== 1 ? "s" : ""} selected
+          </span>
+          <button className="searchSelectionAction" disabled>
+            Open
+          </button>
+          <button
+            className="searchSelectionClear"
+            onClick={() => setSelectedIds(new Set())}
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
       <div className="searchTableWrap">
         {loading && <div className="searchStatus">Loading papers…</div>}
         {error && <div className="searchStatus">{error}</div>}
@@ -145,6 +189,14 @@ export default function SearchPage() {
           <table className="searchTable">
             <thead>
               <tr>
+                <th className="searchTh searchThCheck">
+                  <input
+                    ref={selectAllRef}
+                    type="checkbox"
+                    checked={results.length > 0 && selectedIds.size === results.length}
+                    onChange={toggleSelectAll}
+                  />
+                </th>
                 {cols.map((col) => (
                   <th
                     key={col.key}
@@ -162,9 +214,16 @@ export default function SearchPage() {
               {results.map((p) => (
                 <tr
                   key={p.id}
-                  className="searchTr"
+                  className={`searchTr${selectedIds.has(p.id) ? " searchTrSelected" : ""}`}
                   onClick={() => navigate(`/paper/${p.id}`)}
                 >
+                  <td className="searchTd searchTdCheck" onClick={(e) => toggleSelect(p.id, e)}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(p.id)}
+                      onChange={() => {}}
+                    />
+                  </td>
                   <td className="searchTd searchTdTitle">{p.title}</td>
                   <td className="searchTd searchTdMuted">{p.authors ?? "—"}</td>
                   <td className="searchTd searchTdNum">{p.publicationYear}</td>

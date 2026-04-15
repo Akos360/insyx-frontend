@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getAllAuthors, countryFlag } from '../api/authors';
+import { getAllAuthors, countryFlag } from '../../api/authors';
 import './author-page.css';
 
 type SortKey = 'name' | 'papers' | 'institution';

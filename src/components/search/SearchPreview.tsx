@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsSearch } from "react-icons/bs";
-import { getAllPapers, type Paper } from "../api/papers";
+import { getAllPapers, type Paper } from "../../api/papers";
 import "./SearchPreview.css";
 
 export default function SearchPreview() {
