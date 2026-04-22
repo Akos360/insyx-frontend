@@ -41,6 +41,11 @@ export async function getPaper(id: string) {
   return res.data;
 }
 
+export async function searchPapers(q: string): Promise<Paper[]> {
+  const res = await api.get<Paper[]>("/papers/search", { params: { q } });
+  return res.data;
+}
+
 export async function fetchNeighborhood(id: string, limit = 200) {
   const res = await api.get(`/graph/papers/${id}/neighborhood`, {
     params: { limit },
