@@ -38,9 +38,12 @@ cp .env.example .env
 | `/explore` | `ExplorePage` | Overview cards for all modules |
 | `/search` | `SearchPage` | Paper search with filters and sortable table |
 | `/paper/:id` | `PaperPage` | Single paper detail (metadata, abstract, keywords) |
-| `/graph` | `GraphPage` | 2D and 3D charts (bar, histogram, scatter, surface) |
-| `/globe` | `GlobePage` | Zoomable vector globe with city labels and arcs |
-| `/explore-net` | `ExploreNetPage` | Citation network graph (animated placeholder) |
+| `/authors` | `AuthorsPage` | Author list with paper counts |
+| `/author/:authorId` | `AuthorPage` | Single author detail with publication list |
+| `/graph` | `GraphPage` | Chart gallery overview |
+| `/graph/:chartId` | `SingleChartPage` | Full-screen individual chart |
+| `/globe` | `GlobePage` | Zoomable vector globe with institution pins |
+| `/explore-net` | `ExploreNetPage` | Citation network graph |
 | `/settings` | `SettingsPage` | Account preferences |
 
 ## Project Structure
@@ -51,25 +54,28 @@ insyx-frontend/
 │   ├── App.tsx
 │   ├── api/
 │   │   ├── client.ts            # Axios instance (VITE_API_BASE_URL)
-│   │   └── papers.ts            # Papers API calls + types
+│   │   ├── papers.ts            # Papers API calls + types
+│   │   ├── authors.ts           # Authors API calls + types
+│   │   └── institutions.ts      # Institutions API calls + types
+│   ├── charts/
+│   │   ├── chartList.ts         # Registry of available charts
+│   │   └── buildChartOption.ts  # ECharts option builders
 │   ├── components/
-│   │   ├── AppShell.tsx         # Shared layout (Navbar + Sidebar)
-│   │   ├── Navbar.tsx
-│   │   ├── Sidebar.tsx
-│   │   ├── MapGlobe.tsx         # MapLibre GL globe (vector tiles)
-│   │   ├── GraphPreview.tsx     # Chart preview for explore card
-│   │   ├── NetPreview.tsx       # Animated SVG network preview
-│   │   ├── SearchPreview.tsx    # Functional search preview for explore card
-│   │   └── ThemeToggle.tsx
+│   │   ├── layout/              # AppShell, Navbar, Sidebar, ThemeToggle
+│   │   ├── globe/               # MapGlobe, GlobePanel (MapLibre GL)
+│   │   ├── charts/              # GraphPreview
+│   │   ├── network/             # NetPreview
+│   │   └── search/              # SearchPreview
 │   ├── pages/
-│   │   ├── HomePage.tsx
-│   │   ├── ExplorePage.tsx
-│   │   ├── SearchPage.tsx
-│   │   ├── PaperPage.tsx
-│   │   ├── GraphPage.tsx
-│   │   ├── GlobePage.tsx
-│   │   ├── ExploreNetPage.tsx
-│   │   └── SettingsPage.tsx
+│   │   ├── home/                # HomePage
+│   │   ├── explore/             # ExplorePage
+│   │   ├── search/              # SearchPage
+│   │   ├── paper/               # PaperPage
+│   │   ├── authors/             # AuthorsPage, AuthorPage
+│   │   ├── charts/              # GraphPage, SingleChartPage
+│   │   ├── globe/               # GlobePage
+│   │   ├── network/             # ExploreNetPage
+│   │   └── settings/            # SettingsPage
 │   └── theme/
 │       ├── ThemeContext.tsx      # Light/dark theme provider
 │       └── useTheme.ts
@@ -94,12 +100,17 @@ npm run preview   # preview production build locally
 ## Run With Docker
 
 ```bash
-# Fresh build (no cache)
-docker compose build --no-cache
-docker compose up -d
+docker compose up --build frontend
 ```
 
 Frontend served at `http://localhost:8080`. Backend must be running on `http://localhost:3000`.
+
+To rebuild without cache:
+
+```bash
+docker compose build --no-cache
+docker compose up -d
+```
 
 ```bash
 docker compose down

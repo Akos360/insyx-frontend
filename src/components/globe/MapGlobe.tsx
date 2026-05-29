@@ -115,25 +115,18 @@ function ensureInstitutionLayers(map: maplibregl.Map) {
       },
     });
   }
-
-  console.log(
-    `[MapGlobe] ensureInstitutionLayers — sources: points=${hadPointsSrc}→${!!map.getSource("inst-points")}, ext=${hadExtSrc}→${!!map.getSource("inst-extrusion")}; layers: circles=${hadCircles}→${!!map.getLayer("inst-circles")}, extrusion=${hadExtrusion}→${!!map.getLayer("inst-extrusion")}`,
-  );
 }
 
 function applyLayerVisibility(map: maplibregl.Map, globe: boolean) {
-  // Show circles always during debugging; extrusion in 3D mode on top.
-  const circleVis    = "visible";
+  const circleVis    = globe ? "none" : "visible";
   const extrusionVis = globe ? "visible" : "none";
   if (map.getLayer("inst-circles"))   map.setLayoutProperty("inst-circles",   "visibility", circleVis);
   if (map.getLayer("inst-extrusion")) map.setLayoutProperty("inst-extrusion", "visibility", extrusionVis);
-  console.log(`[MapGlobe] applyLayerVisibility — globe=${globe}, circles=${circleVis}, extrusion=${extrusionVis}`);
 }
 
 function updateSourceData(map: maplibregl.Map, fc: InstitutionFeatureCollection) {
   const pointsSrc = map.getSource("inst-points") as maplibregl.GeoJSONSource | undefined;
   const extSrc    = map.getSource("inst-extrusion") as maplibregl.GeoJSONSource | undefined;
-  console.log(`[MapGlobe] updateSourceData — pointsSrc=${!!pointsSrc}, extSrc=${!!extSrc}, features=${fc.features.length}`);
   pointsSrc?.setData(fc);
   extSrc?.setData(toExtrusionFC(fc));
 }
@@ -187,8 +180,7 @@ export default function MapGlobe({ compact = false, onInstitutionClick }: MapGlo
       "top-right",
     );
 
-    const applyAll = (evt?: string) => {
-      console.log(`[MapGlobe] applyAll triggered by: ${evt ?? "unknown"}, styleLoaded=${map.isStyleLoaded()}`);
+    const applyAll = () => {
       map.setProjection({ type: isGlobeRef.current ? "globe" : "mercator" });
       ensureInstitutionLayers(map);
       applyLayerVisibility(map, isGlobeRef.current);
@@ -197,8 +189,8 @@ export default function MapGlobe({ compact = false, onInstitutionClick }: MapGlo
 
     // `load` fires on first full render; `style.load` fires on every setStyle
     // (theme swaps). Custom layers are wiped on setStyle, so we re-add them both times.
-    map.once("load",       () => applyAll("load"));
-    map.on("style.load",   () => applyAll("style.load"));
+    map.once("load",     () => applyAll());
+    map.on("style.load", () => applyAll());
 
     // Debounce data updates on camera movement
     map.on("moveend", () => scheduleFetch(map));
@@ -251,28 +243,20 @@ export default function MapGlobe({ compact = false, onInstitutionClick }: MapGlo
 
   function scheduleFetch(map: maplibregl.Map) {
     if (fetchTimerRef.current) clearTimeout(fetchTimerRef.current);
-    console.log("[MapGlobe] scheduleFetch queued (debounce 400ms)");
     fetchTimerRef.current = setTimeout(() => doFetch(map), FETCH_DEBOUNCE_MS);
   }
 
   async function doFetch(map: maplibregl.Map) {
     const bounds = map.getBounds();
-    const params = {
-      zoom:   map.getZoom(),
-      minLng: bounds.getWest()  - BBOX_PAD,
-      maxLng: bounds.getEast()  + BBOX_PAD,
-      minLat: Math.max(bounds.getSouth() - BBOX_PAD, -90),
-      maxLat: Math.min(bounds.getNorth() + BBOX_PAD,  90),
-    };
-    console.log("[MapGlobe] doFetch params:", params);
     try {
-      const fc = await getInstitutionsMap(params);
-      console.log("[MapGlobe] API response:", fc.features.length, "features", fc.features[0] ?? "(none)");
-      if (mapRef.current === map) {
-        updateSourceData(map, fc);
-      } else {
-        console.warn("[MapGlobe] map instance mismatch — skipping update");
-      }
+      const fc = await getInstitutionsMap({
+        zoom:   map.getZoom(),
+        minLng: bounds.getWest()  - BBOX_PAD,
+        maxLng: bounds.getEast()  + BBOX_PAD,
+        minLat: Math.max(bounds.getSouth() - BBOX_PAD, -90),
+        maxLat: Math.min(bounds.getNorth() + BBOX_PAD,  90),
+      });
+      if (mapRef.current === map) updateSourceData(map, fc);
     } catch (err) {
       console.error("[MapGlobe] fetch error", err);
     }
