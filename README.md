@@ -103,7 +103,7 @@ npm run preview   # preview production build locally
 docker compose up --build frontend
 ```
 
-Frontend served at `http://localhost:8080`. Backend must be running on `http://localhost:3000`.
+Frontend served at `http://localhost:8081`. Backend must be running on `http://localhost:3000`.
 
 To rebuild without cache:
 

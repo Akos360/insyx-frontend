@@ -271,6 +271,48 @@
   font-size: 0.82rem;
 }
 
+.searchPagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--app-border);
+  background: var(--app-surface);
+  flex-shrink: 0;
+}
+
+.searchPaginationRange,
+.searchPaginationPage {
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
+  white-space: nowrap;
+}
+
+.searchPaginationBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--app-border);
+  background: transparent;
+  color: var(--app-text);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.searchPaginationBtn:hover:not(:disabled) {
+  background: var(--app-overlay);
+}
+
+.searchPaginationBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .searchToolbar {
     padding: 10px 12px;

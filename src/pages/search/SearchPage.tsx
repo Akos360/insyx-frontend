@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BsChevronUp, BsChevronDown, BsSearch } from "react-icons/bs";
-import { getAllPapers, type Paper } from "../../api/papers";
+import { BsChevronUp, BsChevronDown, BsSearch, BsChevronLeft, BsChevronRight } from "react-icons/bs";
+import { searchWorks, getWorkFields, type Work } from "../../api/works";
+import { humanizeAuthors } from "../../utils/authorNames";
 import "./search-page.css";
 
-type SortKey = "title" | "publicationYear" | "citedByCount" | "field" | "authors";
+type SortKey = "title" | "authors" | "publicationYear" | "field" | "citedByCount";
 type SortDir = "asc" | "desc";
+
+const PAGE_SIZE = 50;
 
 function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
   if (!active) return <span className="searchSortIdle">⇅</span>;
@@ -14,65 +17,84 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
     : <BsChevronDown className="searchSortActive" />;
 }
 
+const cols: { key: SortKey; label: string; num?: boolean }[] = [
+  { key: "title",           label: "Title" },
+  { key: "authors",         label: "Authors" },
+  { key: "publicationYear", label: "Year",      num: true },
+  { key: "field",           label: "Field" },
+  { key: "citedByCount",    label: "Citations", num: true },
+];
+
 export default function SearchPage() {
-  const [papers, setPapers] = useState<Paper[]>([]);
+  const [items, setItems] = useState<Work[]>([]);
+  const [total, setTotal] = useState(0);
+  const [offset, setOffset] = useState(0);
+
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [fields, setFields] = useState<string[]>([]);
   const [fieldFilter, setFieldFilter] = useState("");
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
   const [oaOnly, setOaOnly] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("citedByCount");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const selectAllRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
+  // Debounce free-text search so every keystroke doesn't hit the lakehouse.
   useEffect(() => {
-    getAllPapers()
-      .then(setPapers)
-      .catch(() => setError("Failed to load papers."))
-      .finally(() => setLoading(false));
+    const t = setTimeout(() => setDebouncedQuery(query), 350);
+    return () => clearTimeout(t);
+  }, [query]);
+  useEffect(() => {
+    setOffset(0);
+  }, [debouncedQuery]);
+
+  useEffect(() => {
+    getWorkFields()
+      .then(setFields)
+      .catch(() => {
+        /* field dropdown is a nice-to-have; a failed fetch just leaves it empty */
+      });
   }, []);
 
-  const fields = useMemo(
-    () => Array.from(new Set(papers.map((p) => p.field).filter(Boolean))).sort(),
-    [papers]
-  );
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    searchWorks({
+      search: debouncedQuery || undefined,
+      field: fieldFilter || undefined,
+      yearFrom: yearFrom ? Number(yearFrom) : undefined,
+      yearTo: yearTo ? Number(yearTo) : undefined,
+      is_oa: oaOnly || undefined,
+      limit: PAGE_SIZE,
+      offset,
+      sortBy: sortKey,
+      sortDir,
+    })
+      .then((page) => {
+        setItems(page.items);
+        setTotal(page.total);
+      })
+      .catch(() => setError("Failed to load works."))
+      .finally(() => setLoading(false));
+  }, [debouncedQuery, fieldFilter, yearFrom, yearTo, oaOnly, sortKey, sortDir, offset]);
 
-  const results = useMemo(() => {
-    const q = query.toLowerCase();
-    let list = papers.filter((p) => {
-      if (q &&
-        !p.title.toLowerCase().includes(q) &&
-        !p.authors?.toLowerCase().includes(q) &&
-        !p.field?.toLowerCase().includes(q)) return false;
-      if (fieldFilter && p.field !== fieldFilter) return false;
-      if (yearFrom && p.publicationYear < Number(yearFrom)) return false;
-      if (yearTo && p.publicationYear > Number(yearTo)) return false;
-      if (oaOnly && !p.isOa) return false;
-      return true;
-    });
-
-    return [...list].sort((a, b) => {
-      const av = a[sortKey] ?? "";
-      const bv = b[sortKey] ?? "";
-      if (av < bv) return sortDir === "asc" ? -1 : 1;
-      if (av > bv) return sortDir === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [papers, query, fieldFilter, yearFrom, yearTo, oaOnly, sortKey, sortDir]);
-
-  // Keep the select-all checkbox indeterminate when only some rows are selected.
+  // Keep the select-all checkbox indeterminate when only some rows (on this page) are selected.
   useEffect(() => {
     if (selectAllRef.current) {
       selectAllRef.current.indeterminate =
-        selectedIds.size > 0 && selectedIds.size < results.length;
+        selectedIds.size > 0 && selectedIds.size < items.length;
     }
-  }, [selectedIds, results]);
+  }, [selectedIds, items]);
 
   function handleSort(key: SortKey) {
+    setOffset(0);
     if (key === sortKey) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
@@ -92,19 +114,16 @@ export default function SearchPage() {
 
   function toggleSelectAll() {
     setSelectedIds(
-      selectedIds.size === results.length
+      selectedIds.size === items.length
         ? new Set()
-        : new Set(results.map((p) => p.id))
+        : new Set(items.map((w) => w.id))
     );
   }
 
-  const cols: { key: SortKey; label: string; num?: boolean }[] = [
-    { key: "title",           label: "Title" },
-    { key: "authors",         label: "Authors" },
-    { key: "publicationYear", label: "Year",      num: true },
-    { key: "field",           label: "Field" },
-    { key: "citedByCount",    label: "Citations", num: true },
-  ];
+  const page = Math.floor(offset / PAGE_SIZE) + 1;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const rangeFrom = total === 0 ? 0 : offset + 1;
+  const rangeTo = Math.min(offset + items.length, total);
 
   return (
     <main className="searchPage">
@@ -114,7 +133,7 @@ export default function SearchPage() {
           <input
             className="searchInput"
             type="text"
-            placeholder="Search title, author, field…"
+            placeholder="Search title or abstract…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -122,7 +141,10 @@ export default function SearchPage() {
         <select
           className="searchSelect"
           value={fieldFilter}
-          onChange={(e) => setFieldFilter(e.target.value)}
+          onChange={(e) => {
+            setOffset(0);
+            setFieldFilter(e.target.value);
+          }}
         >
           <option value="">All fields</option>
           {fields.map((f) => (
@@ -136,6 +158,7 @@ export default function SearchPage() {
           placeholder="Year from"
           value={yearFrom}
           onChange={(e) => {
+            setOffset(0);
             const isSpinner = (e.nativeEvent as InputEvent).data === null;
             setYearFrom(!yearFrom && isSpinner ? "2000" : e.target.value);
           }}
@@ -147,6 +170,7 @@ export default function SearchPage() {
           placeholder="Year to"
           value={yearTo}
           onChange={(e) => {
+            setOffset(0);
             const isSpinner = (e.nativeEvent as InputEvent).data === null;
             setYearTo(!yearTo && isSpinner ? String(new Date().getFullYear()) : e.target.value);
           }}
@@ -155,11 +179,16 @@ export default function SearchPage() {
           <input
             type="checkbox"
             checked={oaOnly}
-            onChange={(e) => setOaOnly(e.target.checked)}
+            onChange={(e) => {
+              setOffset(0);
+              setOaOnly(e.target.checked);
+            }}
           />
           Open Access
         </label>
-        <span className="searchCount">{results.length} result{results.length !== 1 ? "s" : ""}</span>
+        <span className="searchCount">
+          {total.toLocaleString()} result{total !== 1 ? "s" : ""}
+        </span>
       </div>
 
       {selectedIds.size > 0 && (
@@ -180,12 +209,12 @@ export default function SearchPage() {
       )}
 
       <div className="searchTableWrap">
-        {loading && <div className="searchStatus">Loading papers…</div>}
+        {loading && <div className="searchStatus">Loading works…</div>}
         {error && <div className="searchStatus">{error}</div>}
-        {!loading && !error && results.length === 0 && (
-          <div className="searchStatus">No papers found.</div>
+        {!loading && !error && items.length === 0 && (
+          <div className="searchStatus">No works found.</div>
         )}
-        {!loading && !error && results.length > 0 && (
+        {!loading && !error && items.length > 0 && (
           <table className="searchTable">
             <thead>
               <tr>
@@ -193,7 +222,7 @@ export default function SearchPage() {
                   <input
                     ref={selectAllRef}
                     type="checkbox"
-                    checked={results.length > 0 && selectedIds.size === results.length}
+                    checked={items.length > 0 && selectedIds.size === items.length}
                     onChange={toggleSelectAll}
                   />
                 </th>
@@ -211,31 +240,54 @@ export default function SearchPage() {
               </tr>
             </thead>
             <tbody>
-              {results.map((p) => (
+              {items.map((w) => (
                 <tr
-                  key={p.id}
-                  className={`searchTr${selectedIds.has(p.id) ? " searchTrSelected" : ""}`}
-                  onClick={() => navigate(`/paper/${p.id}`)}
+                  key={w.id}
+                  className={`searchTr${selectedIds.has(w.id) ? " searchTrSelected" : ""}`}
+                  onClick={() => navigate(`/paper/${w.id}`)}
                 >
-                  <td className="searchTd searchTdCheck" onClick={(e) => toggleSelect(p.id, e)}>
+                  <td className="searchTd searchTdCheck" onClick={(e) => toggleSelect(w.id, e)}>
                     <input
                       type="checkbox"
-                      checked={selectedIds.has(p.id)}
+                      checked={selectedIds.has(w.id)}
                       onChange={() => {}}
                     />
                   </td>
-                  <td className="searchTd searchTdTitle">{p.title}</td>
-                  <td className="searchTd searchTdMuted">{p.authors ?? "—"}</td>
-                  <td className="searchTd searchTdNum">{p.publicationYear}</td>
-                  <td className="searchTd searchTdMuted">{p.field ?? "—"}</td>
-                  <td className="searchTd searchTdNum">{p.citedByCount?.toLocaleString()}</td>
-                  <td className="searchTd searchTdNum">{p.isOa ? "✓" : "—"}</td>
+                  <td className="searchTd searchTdTitle">{w.title}</td>
+                  <td className="searchTd searchTdMuted">{humanizeAuthors(w.authors) || "—"}</td>
+                  <td className="searchTd searchTdNum">{w.publication_year}</td>
+                  <td className="searchTd searchTdMuted">{w.field ?? "—"}</td>
+                  <td className="searchTd searchTdNum">{w.cited_by_count?.toLocaleString()}</td>
+                  <td className="searchTd searchTdNum">{w.is_oa ? "✓" : "—"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
+
+      {!loading && !error && total > 0 && (
+        <div className="searchPagination">
+          <span className="searchPaginationRange">
+            {rangeFrom.toLocaleString()}–{rangeTo.toLocaleString()} of {total.toLocaleString()}
+          </span>
+          <button
+            className="searchPaginationBtn"
+            disabled={offset === 0}
+            onClick={() => setOffset((o) => Math.max(0, o - PAGE_SIZE))}
+          >
+            <BsChevronLeft /> Prev
+          </button>
+          <span className="searchPaginationPage">Page {page} of {totalPages}</span>
+          <button
+            className="searchPaginationBtn"
+            disabled={offset + PAGE_SIZE >= total}
+            onClick={() => setOffset((o) => o + PAGE_SIZE)}
+          >
+            Next <BsChevronRight />
+          </button>
+        </div>
+      )}
     </main>
   );
 }

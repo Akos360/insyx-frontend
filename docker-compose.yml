@@ -4,7 +4,10 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_API_BASE_URL: http://localhost:3000
+        # 127.0.0.1, not localhost: on this machine localhost resolves to ::1 first,
+        # and Docker Desktop's IPv6 relay resets connections to published container ports.
+        VITE_API_BASE_URL: http://127.0.0.1:3000
     container_name: insyx-frontend
     ports:
-      - "8080:80"
+      # Moved off 8080 — insyx-database's Trino Web UI also claims host port 8080.
+      - "8081:80"
