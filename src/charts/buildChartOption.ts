@@ -1,20 +1,56 @@
 /**
- * Builds ECharts option objects from real Paper data + theme colors.
+ * Builds ECharts option objects from server-pre-aggregated lakehouse stats.
  *
- * NOTE on scale: this approach fetches all papers and computes aggregations
- * on the client. For millions of records the backend should expose dedicated
- * aggregation endpoints (e.g. GET /stats/papers-by-field?yearFrom=…&yearTo=…)
- * so only pre-aggregated numbers are transferred.  The chart option builders
- * below work correctly at that scale too — just swap the input arrays.
+ * Each builder takes only the pre-aggregated rows it needs (already grouped
+ * and summed by the backend via Trino) — the corpus itself is never fetched
+ * or aggregated client-side, so this scales regardless of corpus size.
  */
-
-import type { Paper } from '../api/papers';
 
 export interface ThemeColors {
   text: string;
   muted: string;
   border: string;
   colors: string[];
+}
+
+export interface YearStat {
+  publication_year: number;
+  paper_count: number;
+  avg_citations: number;
+  total_citations: number;
+}
+
+export interface FieldStat {
+  field: string;
+  paper_count: number;
+  avg_citations: number;
+}
+
+export interface ScatterPoint {
+  publication_year: number;
+  cited_by_count: number;
+  title: string;
+}
+
+export interface OaYearStat {
+  publication_year: number;
+  total: number;
+  oa_count: number;
+  oa_pct: number;
+}
+
+export interface FieldPeriodStat {
+  field: string;
+  period_index: number;
+  paper_count: number;
+}
+
+export interface ChartStatsData {
+  byYear: YearStat[];
+  byField: FieldStat[];
+  scatter: ScatterPoint[];
+  oaByYear: OaYearStat[];
+  fieldPeriod: FieldPeriodStat[];
 }
 
 function axisBase(ct: ThemeColors) {
@@ -32,27 +68,23 @@ const K = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v));
 // Individual builders
 // ---------------------------------------------------------------------------
 
-function papersByField(papers: Paper[], ct: ThemeColors): object {
-  const counts: Record<string, number> = {};
-  for (const p of papers) {
-    if (p.field) counts[p.field] = (counts[p.field] ?? 0) + 1;
-  }
-  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 12);
+function papersByField(byField: FieldStat[], ct: ThemeColors): object {
+  const sorted = [...byField].sort((a, b) => b.paper_count - a.paper_count).slice(0, 12);
   const ax = axisBase(ct);
   return {
     backgroundColor: 'transparent',
     grid: { left: 40, right: 16, top: 36, bottom: 64 },
     xAxis: {
       type: 'category',
-      data: sorted.map(([f]) => f),
+      data: sorted.map((f) => f.field),
       ...ax,
       axisLabel: { ...ax.axisLabel, rotate: 30, interval: 0 },
     },
     yAxis: { type: 'value', ...ax },
     series: [{
       type: 'bar',
-      data: sorted.map(([, c], i) => ({
-        value: c,
+      data: sorted.map((f, i) => ({
+        value: f.paper_count,
         itemStyle: { color: ct.colors[i % ct.colors.length], borderRadius: [3, 3, 0, 0] },
       })),
       barMaxWidth: 48,
@@ -61,21 +93,17 @@ function papersByField(papers: Paper[], ct: ThemeColors): object {
   };
 }
 
-function papersByYear(papers: Paper[], ct: ThemeColors): object {
-  const counts: Record<number, number> = {};
-  for (const p of papers) {
-    if (p.publicationYear) counts[p.publicationYear] = (counts[p.publicationYear] ?? 0) + 1;
-  }
-  const years = Object.keys(counts).map(Number).sort();
+function papersByYear(byYear: YearStat[], ct: ThemeColors): object {
+  const sorted = [...byYear].sort((a, b) => a.publication_year - b.publication_year);
   const ax = axisBase(ct);
   return {
     backgroundColor: 'transparent',
     grid: { left: 36, right: 16, top: 36, bottom: 36 },
-    xAxis: { type: 'category', data: years.map(String), ...ax },
+    xAxis: { type: 'category', data: sorted.map((r) => String(r.publication_year)), ...ax },
     yAxis: { type: 'value', ...ax, minInterval: 1 },
     series: [{
       type: 'bar',
-      data: years.map(y => counts[y]),
+      data: sorted.map((r) => r.paper_count),
       itemStyle: { color: ct.colors[1], borderRadius: [2, 2, 0, 0] },
       barMaxWidth: 32,
     }],
@@ -83,23 +111,17 @@ function papersByYear(papers: Paper[], ct: ThemeColors): object {
   };
 }
 
-function citationsByYear(papers: Paper[], ct: ThemeColors): object {
-  const sums: Record<number, number> = {};
-  for (const p of papers) {
-    if (p.publicationYear) {
-      sums[p.publicationYear] = (sums[p.publicationYear] ?? 0) + (p.citedByCount ?? 0);
-    }
-  }
-  const years = Object.keys(sums).map(Number).sort();
+function citationsByYear(byYear: YearStat[], ct: ThemeColors): object {
+  const sorted = [...byYear].sort((a, b) => a.publication_year - b.publication_year);
   const ax = axisBase(ct);
   return {
     backgroundColor: 'transparent',
     grid: { left: 56, right: 16, top: 36, bottom: 36 },
-    xAxis: { type: 'category', data: years.map(String), ...ax },
+    xAxis: { type: 'category', data: sorted.map((r) => String(r.publication_year)), ...ax },
     yAxis: { type: 'value', ...ax, axisLabel: { color: ct.muted, formatter: K } },
     series: [{
       type: 'line',
-      data: years.map(y => sums[y]),
+      data: sorted.map((r) => r.total_citations),
       smooth: true,
       symbol: 'circle',
       symbolSize: 5,
@@ -119,10 +141,8 @@ function citationsByYear(papers: Paper[], ct: ThemeColors): object {
   };
 }
 
-function yearVsCitations(papers: Paper[], ct: ThemeColors): object {
-  const data = papers
-    .filter(p => p.publicationYear && p.citedByCount != null)
-    .map(p => [p.publicationYear, p.citedByCount, p.title]);
+function yearVsCitations(scatter: ScatterPoint[], ct: ThemeColors): object {
+  const data = scatter.map((p) => [p.publication_year, p.cited_by_count, p.title]);
   const ax = axisBase(ct);
   return {
     backgroundColor: 'transparent',
@@ -153,9 +173,10 @@ function yearVsCitations(papers: Paper[], ct: ThemeColors): object {
   };
 }
 
-function openAccess(papers: Paper[], ct: ThemeColors): object {
-  const oaCount = papers.filter(p => p.isOa).length;
-  const closed  = papers.length - oaCount;
+function openAccess(oaByYear: OaYearStat[], ct: ThemeColors): object {
+  const oaCount = oaByYear.reduce((s, r) => s + Number(r.oa_count), 0);
+  const total = oaByYear.reduce((s, r) => s + Number(r.total), 0);
+  const closed = total - oaCount;
   return {
     backgroundColor: 'transparent',
     series: [{
@@ -173,24 +194,17 @@ function openAccess(papers: Paper[], ct: ThemeColors): object {
   };
 }
 
-const PERIODS = ['2012–15', '2016–19', '2020–23'] as const;
+export const PERIODS = ['2012–15', '2016–19', '2020–23'] as const;
 
-function periodOf(year: number): string | null {
-  if (year >= 2012 && year <= 2015) return '2012–15';
-  if (year >= 2016 && year <= 2019) return '2016–19';
-  if (year >= 2020 && year <= 2023) return '2020–23';
-  return null;
-}
+function fieldPeriod(rows: FieldPeriodStat[], ct: ThemeColors): object {
+  const fields = [...new Set(rows.map((r) => r.field))]
+    .sort((a, b) => {
+      const totalA = rows.filter((r) => r.field === a).reduce((s, r) => s + r.paper_count, 0);
+      const totalB = rows.filter((r) => r.field === b).reduce((s, r) => s + r.paper_count, 0);
+      return totalB - totalA;
+    })
+    .slice(0, 8);
 
-function fieldPeriod(papers: Paper[], ct: ThemeColors): object {
-  const fields = [...new Set(papers.map(p => p.field).filter(Boolean))].slice(0, 8);
-  const counts: Record<string, Record<string, number>> = {};
-  for (const f of fields) counts[f] = { '2012–15': 0, '2016–19': 0, '2020–23': 0 };
-  for (const p of papers) {
-    if (!p.field || !p.publicationYear) continue;
-    const period = periodOf(p.publicationYear);
-    if (period && counts[p.field]) counts[p.field][period]++;
-  }
   const ax = axisBase(ct);
   return {
     backgroundColor: 'transparent',
@@ -202,7 +216,9 @@ function fieldPeriod(papers: Paper[], ct: ThemeColors): object {
       type: 'bar',
       name: f,
       stack: 'field',
-      data: PERIODS.map(period => counts[f][period] ?? 0),
+      data: PERIODS.map((_, periodIndex) =>
+        rows.find((r) => r.field === f && r.period_index === periodIndex)?.paper_count ?? 0,
+      ),
       itemStyle: { color: ct.colors[i % ct.colors.length] },
     })),
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -215,17 +231,17 @@ function fieldPeriod(papers: Paper[], ct: ThemeColors): object {
 
 export function buildChartOption(
   chartId: string,
-  papers: Paper[],
+  data: ChartStatsData,
   ct: ThemeColors,
 ): object {
   switch (chartId) {
-    case 'papers-by-field':   return papersByField(papers, ct);
-    case 'papers-by-year':    return papersByYear(papers, ct);
-    case 'citations-by-year': return citationsByYear(papers, ct);
-    case 'year-vs-citations': return yearVsCitations(papers, ct);
-    case 'open-access':       return openAccess(papers, ct);
-    case 'field-period':      return fieldPeriod(papers, ct);
-    default:                  return papersByField(papers, ct);
+    case 'papers-by-field':   return papersByField(data.byField, ct);
+    case 'papers-by-year':    return papersByYear(data.byYear, ct);
+    case 'citations-by-year': return citationsByYear(data.byYear, ct);
+    case 'year-vs-citations': return yearVsCitations(data.scatter, ct);
+    case 'open-access':       return openAccess(data.oaByYear, ct);
+    case 'field-period':      return fieldPeriod(data.fieldPeriod, ct);
+    default:                  return papersByField(data.byField, ct);
   }
 }
 

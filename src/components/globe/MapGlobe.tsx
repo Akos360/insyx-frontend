@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MdMyLocation } from "react-icons/md";
 import { BsCamera, BsFullscreen, BsFullscreenExit } from "react-icons/bs";
+import type { Feature, FeatureCollection } from "geojson";
 import { useTheme } from "../../theme/useTheme";
 import {
   getInstitutionsMap,
   type InstitutionFeature,
   type InstitutionFeatureCollection,
-} from "../../api/institutions";
+} from "../../api/works";
 import "./MapGlobe.css";
 
 const KEY = import.meta.env.VITE_MAPTILER_KEY as string;
@@ -43,14 +44,14 @@ type MapGlobeProps = {
 // GeoJSON builders
 // ---------------------------------------------------------------------------
 
-function toExtrusionFC(points: InstitutionFeatureCollection): GeoJSON.FeatureCollection {
+function toExtrusionFC(points: InstitutionFeatureCollection): FeatureCollection {
   return {
     type: "FeatureCollection",
     features: points.features.map((f) => toPolygon(f)),
   };
 }
 
-function toPolygon(f: InstitutionFeature): GeoJSON.Feature {
+function toPolygon(f: InstitutionFeature): Feature {
   const [lng, lat] = f.geometry.coordinates;
   const coords = circleRing(lat, lng, EXTRUSION_RADIUS_DEG);
   return {
@@ -70,7 +71,7 @@ function circleRing(lat: number, lng: number, r: number, steps = 32): number[][]
   return pts;
 }
 
-const EMPTY_FC: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
+const EMPTY_FC: FeatureCollection = { type: "FeatureCollection", features: [] };
 
 // ---------------------------------------------------------------------------
 // Layer management
@@ -197,7 +198,7 @@ export default function MapGlobe({ compact = false, onInstitutionClick }: MapGlo
     map.on("zoomend", () => scheduleFetch(map));
 
     // Institution point interaction
-    map.on("click", "inst-circles", (e) => {
+    map.on("click", "inst-circles", (e: maplibregl.MapLayerMouseEvent) => {
       const f = e.features?.[0];
       if (!f) return;
       const p = f.properties as Record<string, unknown>;
@@ -275,7 +276,7 @@ export default function MapGlobe({ compact = false, onInstitutionClick }: MapGlo
     const map = mapRef.current;
     if (!map) return;
     map.once("render", () => {
-      map.getCanvas().toBlob((blob) => {
+      map.getCanvas().toBlob((blob: Blob | null) => {
         if (!blob) return;
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");

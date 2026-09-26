@@ -1,3 +1,26 @@
+/*
+ * Shared responsive breakpoints (documented convention, not literal CSS
+ * variables — custom properties can't be substituted into @media/@container
+ * conditions without a build step). Use these two exact pixel values
+ * consistently across page CSS files instead of ad hoc ones:
+ *   1024px — "half-screen / tablet" tier: multi-column layouts collapse to
+ *            one column, secondary panels/sidebars shrink.
+ *   640px  — "phone" tier: full single-column stack, compact spacing.
+ * Prefer @container over @media for anything nested inside .appShellContent
+ * (see app-shell.css) — it reacts to the actual space left after the app
+ * sidebar, not the raw window width.
+ */
+
+/*
+ * Palette, tier 1 (brand anchors — unchanged in spirit, refined in oklch for
+ * even lightness/chroma steps). Tier 2 (--app-*, below) is what components
+ * actually consume; --app-accent is a deliberate near-constant across both
+ * themes (~52% lightness reads clearly against both a near-black and a
+ * near-white surface, and still contrasts white text on a filled badge),
+ * while --app-accent-strong is the one thing that's genuinely different per
+ * theme — a glowing mint in the dark theme, a deep indigo in the light one —
+ * each theme's single "signature" moment (CTA button, active states).
+ */
 :root {
   --shadow-grey: #161925ff;
   --twilight-indigo: #23395bff;
@@ -5,45 +28,67 @@
   --powder-blue: #8ea8c3ff;
   --frozen-water: #cbf7edff;
 
-  --app-bg: #071018;
-  --app-bg-elevated: #0b1520;
-  --app-surface: #111b28;
-  --app-surface-soft: #182435;
-  --app-surface-strong: #223754;
-  --app-text: #ecf6ff;
-  --app-text-muted: #9db5ca;
-  --app-border: #29415f;
-  --app-border-strong: #406e8e;
-  --app-accent: #8ea8c3;
-  --app-accent-strong: #cbf7ed;
-  --app-button-bg: #cbf7ed;
-  --app-button-bg-hover: #8ea8c3;
-  --app-button-text: #081018;
-  --app-overlay: rgba(4, 8, 14, 0.56);
-  --app-input-bg: rgba(7, 16, 24, 0.68);
-  --app-shadow: rgba(2, 7, 13, 0.34);
+  --app-bg: oklch(15% 0.025 255);
+  --app-bg-elevated: oklch(18% 0.028 255);
+  --app-surface: oklch(21% 0.03 255);
+  --app-surface-soft: oklch(25% 0.032 255);
+  --app-surface-strong: oklch(31% 0.038 255);
+  --app-text: oklch(95% 0.012 255);
+  --app-text-muted: oklch(68% 0.035 250);
+  --app-border: oklch(33% 0.038 255);
+  --app-border-strong: oklch(46% 0.045 250);
+  --app-accent: oklch(58% 0.12 235);
+  --app-accent-strong: oklch(87% 0.11 175);
+  --app-button-bg: var(--app-accent-strong);
+  --app-button-bg-hover: color-mix(in oklab, var(--app-accent-strong), white 15%);
+  --app-button-text: oklch(16% 0.02 255);
+  --app-overlay: oklch(8% 0.02 255 / 58%);
+  --app-input-bg: oklch(12% 0.02 255 / 70%);
+  --app-shadow: oklch(4% 0.02 255 / 40%);
   --app-icon-filter: invert(1);
+  /* Frosted-glass surfaces (login card, GlobePanel) — a cool, faintly lit tint
+     and a soft highlight border, meant to sit over the animated gradient. */
+  --app-glass-tint: oklch(35% 0.03 255 / 38%);
+  --app-glass-border: oklch(85% 0.05 195 / 28%);
+
+  color-scheme: dark;
+  accent-color: var(--app-accent-strong);
+  scrollbar-color: var(--app-border-strong) var(--app-bg-elevated);
 }
 
 body[data-theme="light"] {
-  --app-bg: #f7fbff;
-  --app-bg-elevated: #ffffff;
-  --app-surface: #ffffff;
-  --app-surface-soft: #edf5fb;
-  --app-surface-strong: #dbe8f4;
-  --app-text: #161925;
-  --app-text-muted: #406e8e;
-  --app-border: #bfd0e0;
-  --app-border-strong: #8ea8c3;
-  --app-accent: #406e8e;
-  --app-accent-strong: #23395b;
-  --app-button-bg: #edf5fb;
-  --app-button-bg-hover: #dbe8f4;
-  --app-button-text: #161925;
-  --app-overlay: rgba(142, 168, 195, 0.16);
-  --app-input-bg: #ffffff;
-  --app-shadow: rgba(35, 57, 91, 0.08);
+  --app-bg: oklch(98.5% 0.006 250);
+  --app-bg-elevated: oklch(100% 0 0);
+  --app-surface: oklch(100% 0 0);
+  --app-surface-soft: oklch(96.5% 0.008 250);
+  --app-surface-strong: oklch(92% 0.016 250);
+  --app-text: oklch(24% 0.03 255);
+  --app-text-muted: oklch(46% 0.035 250);
+  --app-border: oklch(89% 0.014 250);
+  --app-border-strong: oklch(76% 0.028 245);
+  --app-accent: oklch(50% 0.12 235);
+  --app-accent-strong: oklch(36% 0.13 250);
+  --app-button-bg: var(--app-accent-strong);
+  --app-button-bg-hover: color-mix(in oklab, var(--app-accent-strong), black 12%);
+  --app-button-text: oklch(97% 0.01 255);
+  --app-overlay: oklch(60% 0.03 250 / 14%);
+  --app-input-bg: oklch(100% 0 0);
+  --app-shadow: oklch(45% 0.03 250 / 10%);
   --app-icon-filter: none;
+  --app-glass-tint: oklch(100% 0 0 / 45%);
+  --app-glass-border: oklch(100% 0 0 / 60%);
+
+  color-scheme: light;
+  accent-color: var(--app-accent-strong);
+  scrollbar-color: var(--app-border-strong) var(--app-surface-soft);
+}
+
+::selection {
+  /* --app-accent sits at ~50-58% lightness in both themes, so a near-white
+     foreground reads clearly either way — unlike --app-button-text, which is
+     paired specifically with --app-accent-strong's much larger lightness swing. */
+  background: var(--app-accent);
+  color: oklch(97% 0.01 255);
 }
 
 #root {

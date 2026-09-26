@@ -224,8 +224,13 @@
   color: var(--app-text);
 }
 
-/* ── responsive ── */
-@media (max-width: 640px) {
+/* ── responsive (@container reacts to .appShellContent's actual width, not
+   the raw window — see app-shell.css) ── */
+@container (max-width: 1024px) {
+  .scFilters { width: 160px; }
+}
+
+@container (max-width: 640px) {
   .scBody { flex-direction: column; }
   .scFilters {
     width: 100%;

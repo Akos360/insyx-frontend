@@ -381,3 +381,18 @@
   color: #6dbf82;
   border-color: rgba(100, 200, 120, 0.3);
 }
+
+/* ─── Responsive (reacts to .appShellContent's actual width, not the raw
+   window — see app-shell.css) ────────────────────────────────────────── */
+
+@container (max-width: 1024px) {
+  .globePanel {
+    width: min(300px, 90vw);
+  }
+}
+
+@container (max-width: 640px) {
+  .globePanel {
+    width: 100vw;
+  }
+}

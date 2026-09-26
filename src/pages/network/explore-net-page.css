@@ -60,16 +60,9 @@
   grid-row: span 2;
 }
 
-@media (max-width: 768px) {
-  .exploreNetPage {
-    padding: 12px;
-  }
-
-  .exploreNetPageCard {
-    min-height: auto;
-    padding: 16px;
-  }
-
+/* @container reacts to .appShellContent's actual width, not the raw window
+   — see app-shell.css */
+@container (max-width: 1024px) {
   .exploreNetPageContent {
     grid-template-columns: 1fr;
   }
@@ -77,5 +70,16 @@
   .exploreNetPageBlockLarge {
     min-height: 180px;
     grid-row: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .exploreNetPage {
+    padding: 12px;
+  }
+
+  .exploreNetPageCard {
+    min-height: auto;
+    padding: 16px;
   }
 }

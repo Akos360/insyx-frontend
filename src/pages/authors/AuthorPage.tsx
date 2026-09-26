@@ -3,7 +3,8 @@ import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BsArrowLeft, BsBoxArrowUpRight } from 'react-icons/bs';
-import { getAuthorRecords, countryFlag } from '../../api/authors';
+import { getAuthor, countryFlag } from '../../api/works';
+import { humanizeAuthors } from '../../utils/authorNames';
 import { makeThemeColors } from '../../charts/buildChartOption';
 import { useTheme } from '../../theme/useTheme';
 import './author-page.css';
@@ -12,30 +13,20 @@ export default function AuthorPage() {
   const { authorId = '' } = useParams<{ authorId: string }>();
   const { theme } = useTheme();
 
-  const { data: records = [], isLoading, isError } = useQuery({
+  const { data: profile, isLoading, isError } = useQuery({
     queryKey: ['author', authorId],
-    queryFn: () => getAuthorRecords(authorId),
+    queryFn: () => getAuthor(authorId),
     enabled: !!authorId,
   });
 
-  // Derive author profile from the first record
-  const profile = records[0];
+  const papers = profile?.papers ?? [];
 
   const stats = useMemo(() => {
-    const totalCitations = records.reduce((s, r) => s + (r.paper?.citedByCount ?? 0), 0);
-    const years = records.map(r => r.publicationYear).filter(Boolean);
-    const fields = [...new Set(records.map(r => r.paper?.field).filter(Boolean))];
-    const institutions = [...new Set(
-      records.flatMap(r => {
-        const base = r.firstInstitutionName ? [r.firstInstitutionName] : [];
-        const full = Array.isArray(r.institutionsFull)
-          ? r.institutionsFull.map((i: any) => i?.display_name ?? i?.name).filter(Boolean)
-          : [];
-        return [...base, ...full];
-      }),
-    )];
-    return { totalCitations, years, fields, institutions };
-  }, [records]);
+    const totalCitations = papers.reduce((s, p) => s + (p.cited_by_count ?? 0), 0);
+    const years = papers.map(p => p.publication_year).filter(Boolean);
+    const fields = [...new Set(papers.map(p => p.field).filter(Boolean))];
+    return { totalCitations, years, fields };
+  }, [papers]);
 
   // ── charts ───────────────────────────────────────────────────────────────
   const { citationsChart, papersYearChart } = useMemo(() => {
@@ -48,9 +39,8 @@ export default function AuthorPage() {
     };
 
     // Citations per paper (horizontal bar — easiest to read author impact)
-    const sorted = [...records]
-      .filter(r => r.paper)
-      .sort((a, b) => (b.paper?.citedByCount ?? 0) - (a.paper?.citedByCount ?? 0))
+    const sorted = [...papers]
+      .sort((a, b) => (b.cited_by_count ?? 0) - (a.cited_by_count ?? 0))
       .slice(0, 10);
 
     const citationsChart = {
@@ -60,8 +50,8 @@ export default function AuthorPage() {
       xAxis: { type: 'value', ...ax, axisLabel: { ...ax.axisLabel, formatter: (v: number) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : String(v) } },
       yAxis: {
         type: 'category',
-        data: sorted.map(r => {
-          const t = r.paper?.title ?? r.paperId;
+        data: sorted.map(p => {
+          const t = p.title ?? p.id;
           return t.length > 32 ? t.slice(0, 30) + '…' : t;
         }).reverse(),
         ...ax,
@@ -69,7 +59,7 @@ export default function AuthorPage() {
       },
       series: [{
         type: 'bar',
-        data: sorted.map(r => r.paper?.citedByCount ?? 0).reverse(),
+        data: sorted.map(p => p.cited_by_count ?? 0).reverse(),
         itemStyle: { color: ct.colors[0], borderRadius: [0, 3, 3, 0] },
         barMaxWidth: 28,
       }],
@@ -77,8 +67,8 @@ export default function AuthorPage() {
 
     // Papers by year
     const yearCounts: Record<number, number> = {};
-    for (const r of records) {
-      if (r.publicationYear) yearCounts[r.publicationYear] = (yearCounts[r.publicationYear] ?? 0) + 1;
+    for (const p of papers) {
+      if (p.publication_year) yearCounts[p.publication_year] = (yearCounts[p.publication_year] ?? 0) + 1;
     }
     const sortedYears = Object.keys(yearCounts).map(Number).sort();
 
@@ -97,7 +87,7 @@ export default function AuthorPage() {
     };
 
     return { citationsChart, papersYearChart };
-  }, [records, theme]);
+  }, [papers, theme]);
 
   // ── render ────────────────────────────────────────────────────────────────
   if (isLoading) return <div className="authorPage"><div className="authorStatus">Loading…</div></div>;
@@ -108,6 +98,7 @@ export default function AuthorPage() {
   );
 
   const flag = countryFlag(profile.countryCode);
+  const displayName = humanizeAuthors(profile.displayName) || authorId;
 
   return (
     <div className="authorPage">
@@ -119,7 +110,7 @@ export default function AuthorPage() {
         <div className="authorHeaderMain">
           {flag && <span className="authorFlag">{flag}</span>}
           <div>
-            <h1 className="authorName">{profile.displayName ?? authorId}</h1>
+            <h1 className="authorName">{displayName}</h1>
             {profile.firstInstitutionName && (
               <p className="authorInstitution">{profile.firstInstitutionName}</p>
             )}
@@ -146,7 +137,7 @@ export default function AuthorPage() {
       {/* ── stats strip ── */}
       <div className="authorStats">
         <div className="authorStat">
-          <span className="authorStatValue">{records.length}</span>
+          <span className="authorStatValue">{papers.length}</span>
           <span className="authorStatLabel">Papers</span>
         </div>
         <div className="authorStat">
@@ -172,36 +163,24 @@ export default function AuthorPage() {
         </div>
       )}
 
-      {/* ── all institutions ── */}
-      {stats.institutions.length > 1 && (
-        <div className="authorSection">
-          <div className="authorSectionTitle">Institutions</div>
-          <div className="authorInstitutionList">
-            {stats.institutions.map(inst => (
-              <span key={inst} className="authorInstitutionTag">{inst}</span>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="authorBody">
         {/* ── papers list ── */}
         <div className="authorSection authorPapers">
-          <div className="authorSectionTitle">Works ({records.length})</div>
+          <div className="authorSectionTitle">Works ({papers.length})</div>
           <div className="authorPaperList">
-            {records.map(r => (
-              <Link key={r.paperId} to={`/paper/${r.paperId}`} className="authorPaperItem">
+            {papers.map(p => (
+              <Link key={p.id} to={`/paper/${p.id}`} className="authorPaperItem">
                 <div className="authorPaperMeta">
-                  <span className="authorPaperYear">{r.publicationYear}</span>
-                  {r.paper?.field && <span className="authorPaperField">{r.paper.field}</span>}
-                  {r.paper?.isOa && <span className="authorPaperOa">OA</span>}
+                  <span className="authorPaperYear">{p.publication_year}</span>
+                  {p.field && <span className="authorPaperField">{p.field}</span>}
+                  {p.is_oa && <span className="authorPaperOa">OA</span>}
                 </div>
-                <div className="authorPaperTitle">{r.paper?.title ?? r.paperId}</div>
-                {r.paper?.sourceName && (
+                <div className="authorPaperTitle">{p.title ?? p.id}</div>
+                {p.source_name && (
                   <div className="authorPaperSource">
-                    {r.paper.sourceName}
-                    {r.paper.citedByCount != null && (
-                      <span className="authorPaperCites">{r.paper.citedByCount.toLocaleString()} citations</span>
+                    {p.source_name}
+                    {p.cited_by_count != null && (
+                      <span className="authorPaperCites">{p.cited_by_count.toLocaleString()} citations</span>
                     )}
                   </div>
                 )}
@@ -211,18 +190,16 @@ export default function AuthorPage() {
         </div>
 
         {/* ── charts ── */}
-        {records.length > 1 && (
+        {papers.length > 1 && (
           <div className="authorCharts">
             <div className="authorChartBlock">
               <div className="authorSectionTitle">Citations per work</div>
               <ReactECharts option={citationsChart} style={{ height: 220 }} notMerge />
             </div>
-            {Object.keys({}).length > 0 || stats.years.length > 1 ? (
-              <div className="authorChartBlock">
-                <div className="authorSectionTitle">Papers by year</div>
-                <ReactECharts option={papersYearChart} style={{ height: 180 }} notMerge />
-              </div>
-            ) : null}
+            <div className="authorChartBlock">
+              <div className="authorSectionTitle">Papers by year</div>
+              <ReactECharts option={papersYearChart} style={{ height: 180 }} notMerge />
+            </div>
           </div>
         )}
       </div>

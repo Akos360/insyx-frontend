@@ -1,84 +1,111 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getAllAuthors, countryFlag } from '../../api/authors';
+import { searchAuthors, countryFlag, type AuthorListItem } from '../../api/works';
+import { humanizeAuthors } from '../../utils/authorNames';
 import './author-page.css';
 
-type SortKey = 'name' | 'papers' | 'institution';
+type SortKey = 'displayName' | 'worksCount' | 'citedByCount';
+
+const PAGE_SIZE = 50;
 
 export default function AuthorsPage() {
-  const [search, setSearch]   = useState('');
-  const [sortBy, setSortBy]   = useState<SortKey>('papers');
+  const [items, setItems] = useState<AuthorListItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [offset, setOffset] = useState(0);
 
-  const { data: authors = [], isLoading, isError } = useQuery({
-    queryKey: ['authors'],
-    queryFn: getAllAuthors,
-  });
+  const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [sortBy, setSortBy] = useState<SortKey>('worksCount');
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    const list = q
-      ? authors.filter(a =>
-          a.displayName?.toLowerCase().includes(q) ||
-          a.firstInstitutionName?.toLowerCase().includes(q) ||
-          a.countryCode?.toLowerCase().includes(q),
-        )
-      : authors;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    return [...list].sort((a, b) => {
-      if (sortBy === 'papers')      return Number(b.paperCount) - Number(a.paperCount);
-      if (sortBy === 'name')        return (a.displayName ?? '').localeCompare(b.displayName ?? '');
-      if (sortBy === 'institution') return (a.firstInstitutionName ?? '').localeCompare(b.firstInstitutionName ?? '');
-      return 0;
-    });
-  }, [authors, search, sortBy]);
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 350);
+    return () => clearTimeout(t);
+  }, [query]);
+  useEffect(() => { setOffset(0); }, [debouncedQuery, sortBy]);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    searchAuthors({ search: debouncedQuery || undefined, sortBy, sortDir: 'desc', limit: PAGE_SIZE, offset })
+      .then((page) => { setItems(page.items); setTotal(page.total); })
+      .catch(() => setError('Failed to load authors.'))
+      .finally(() => setLoading(false));
+  }, [debouncedQuery, sortBy, offset]);
+
+  const page = Math.floor(offset / PAGE_SIZE) + 1;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <div className="authorsRoot">
       <div className="authorsTopBar">
-        <h2 className="authorsTitle">Authors <span className="authorsCount">{authors.length}</span></h2>
+        <h2 className="authorsTitle">Authors <span className="authorsCount">{total.toLocaleString()}</span></h2>
         <div className="authorsControls">
           <input
             className="authorsSearch"
             type="search"
-            placeholder="Search by name or institution…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by name…"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
           />
           <select
             className="authorsSort"
             value={sortBy}
             onChange={e => setSortBy(e.target.value as SortKey)}
           >
-            <option value="papers">Sort: Papers</option>
-            <option value="name">Sort: Name</option>
-            <option value="institution">Sort: Institution</option>
+            <option value="worksCount">Sort: Papers</option>
+            <option value="citedByCount">Sort: Citations</option>
+            <option value="displayName">Sort: Name</option>
           </select>
         </div>
       </div>
 
-      {isLoading && <div className="authorsStatus">Loading authors…</div>}
-      {isError   && <div className="authorsStatus authorsStatusError">Failed to load authors.</div>}
+      {loading && <div className="authorsStatus">Loading authors…</div>}
+      {error   && <div className="authorsStatus authorsStatusError">{error}</div>}
 
-      {!isLoading && !isError && (
-        <div className="authorsList">
-          {filtered.length === 0 && <div className="authorsStatus">No authors match your search.</div>}
-          {filtered.map(a => (
-            <Link key={a.authorId} to={`/author/${a.authorId}`} className="authorsCard">
-              <span className="authorsFlag">{countryFlag(a.countryCode)}</span>
-              <div className="authorsCardBody">
-                <span className="authorsName">{a.displayName ?? a.authorId}</span>
-                {a.firstInstitutionName && (
-                  <span className="authorsInstitution">{a.firstInstitutionName}</span>
-                )}
-              </div>
-              <div className="authorsCardMeta">
-                <span className="authorsPaperBadge">{a.paperCount} {Number(a.paperCount) === 1 ? 'paper' : 'papers'}</span>
-                {a.orcid && <span className="authorsOrcidDot" title="Has ORCID">ID</span>}
-              </div>
-            </Link>
-          ))}
-        </div>
+      {!loading && !error && (
+        <>
+          <div className="authorsList">
+            {items.length === 0 && <div className="authorsStatus">No authors match your search.</div>}
+            {items.map(a => (
+              <Link key={a.author_id} to={`/author/${a.author_id}`} className="authorsCard">
+                <span className="authorsFlag">{countryFlag(a.country_code)}</span>
+                <div className="authorsCardBody">
+                  <span className="authorsName">{humanizeAuthors(a.display_name) || a.author_id}</span>
+                </div>
+                <div className="authorsCardMeta">
+                  <span className="authorsPaperBadge">{a.works_count} {a.works_count === 1 ? 'paper' : 'papers'}</span>
+                  {a.orcid && <span className="authorsOrcidDot" title="Has ORCID">ID</span>}
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {total > 0 && (
+            <div className="searchPagination">
+              <span className="searchPaginationRange">
+                {(offset + 1).toLocaleString()}–{Math.min(offset + items.length, total).toLocaleString()} of {total.toLocaleString()}
+              </span>
+              <button
+                className="searchPaginationBtn"
+                disabled={offset === 0}
+                onClick={() => setOffset(o => Math.max(0, o - PAGE_SIZE))}
+              >
+                Prev
+              </button>
+              <span className="searchPaginationPage">Page {page} of {totalPages}</span>
+              <button
+                className="searchPaginationBtn"
+                disabled={offset + PAGE_SIZE >= total}
+                onClick={() => setOffset(o => o + PAGE_SIZE)}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

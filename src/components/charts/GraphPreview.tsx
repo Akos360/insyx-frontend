@@ -1,30 +1,25 @@
 import ReactECharts from 'echarts-for-react';
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
-import { getAllPapers } from '../../api/papers';
 import { CHART_LIST } from '../../charts/chartList';
 import { buildChartOption, makeThemeColors } from '../../charts/buildChartOption';
+import { useWorksStats } from '../../charts/useWorksStats';
 import { useTheme } from '../../theme/useTheme';
+
+const STALE = 5 * 60 * 1000;
 
 export default function GraphPreview() {
   const { theme } = useTheme();
   const [idx, setIdx] = useState(0);
-
-  // Shared query — React Query deduplicates this with GraphPage's identical query key
-  const { data: papers = [] } = useQuery({
-    queryKey: ['papers'],
-    queryFn: getAllPapers,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data } = useWorksStats({ staleTime: STALE });
 
   const options = useMemo(() => {
     const ct = makeThemeColors(theme === 'dark');
     return CHART_LIST.map(c => ({
-      ...(buildChartOption(c.id, papers, ct) as object),
+      ...(buildChartOption(c.id, data, ct) as object),
       animation: false,
     }));
-  }, [papers, theme]);
+  }, [data, theme]);
 
   const prev = (e: React.MouseEvent) => {
     e.stopPropagation();

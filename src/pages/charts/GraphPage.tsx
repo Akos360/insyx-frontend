@@ -3,45 +3,31 @@ import 'echarts-gl';
 import ReactECharts from 'echarts-for-react';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { BsArrowsAngleExpand } from 'react-icons/bs';
-import { getAllPapers } from '../../api/papers';
 import { useTheme } from '../../theme/useTheme';
 import { CHART_LIST } from '../../charts/chartList';
-import { buildChartOption, makeThemeColors } from '../../charts/buildChartOption';
+import { buildChartOption, makeThemeColors, PERIODS } from '../../charts/buildChartOption';
+import { useWorksStats } from '../../charts/useWorksStats';
 import './graph-page.css';
-
-const PERIODS = ['2012–15', '2016–19', '2020–23'] as const;
-
-function periodIndex(year: number): number | null {
-  if (year >= 2012 && year <= 2015) return 0;
-  if (year >= 2016 && year <= 2019) return 1;
-  if (year >= 2020 && year <= 2023) return 2;
-  return null;
-}
 
 export default function GraphPage() {
   const { theme } = useTheme();
-
-  const { data: papers = [], isLoading, isError } = useQuery({
-    queryKey: ['papers'],
-    queryFn: getAllPapers,
-  });
+  const { data, isLoading, isError } = useWorksStats();
 
   const { chartOptions } = useMemo(() => {
     const ct = makeThemeColors(theme === 'dark');
 
-    const bar       = buildChartOption('papers-by-field',   papers, ct);
-    const histogram = buildChartOption('papers-by-year',    papers, ct);
-    const line      = buildChartOption('citations-by-year', papers, ct);
-    const scatter   = buildChartOption('year-vs-citations', papers, ct);
-    const pie       = buildChartOption('open-access',       papers, ct);
+    const bar       = buildChartOption('papers-by-field',   data, ct);
+    const histogram = buildChartOption('papers-by-year',    data, ct);
+    const line      = buildChartOption('citations-by-year', data, ct);
+    const scatterOpt = buildChartOption('year-vs-citations', data, ct);
+    const pie       = buildChartOption('open-access',       data, ct);
 
-    // 3D bar — built from real data; echarts-gl renders it
-    const fields = [...new Set(papers.map(p => p.field).filter(Boolean))].slice(0, 6);
+    // 3D bar — built from the field×period stats endpoint; echarts-gl renders it
+    const fields = [...new Set(data.fieldPeriod.map((r) => r.field))].slice(0, 6);
     const bar3dData = fields.flatMap((field, yi) =>
       PERIODS.map((_, xi) => {
-        const count = papers.filter(p => periodIndex(p.publicationYear) === xi && p.field === field).length;
+        const count = data.fieldPeriod.find((r) => r.field === field && r.period_index === xi)?.paper_count ?? 0;
         return { value: [xi, yi, count] as [number, number, number], itemStyle: { color: ct.colors[yi % ct.colors.length] } };
       }),
     );
@@ -62,8 +48,8 @@ export default function GraphPage() {
       series: [{ type: 'bar3D', data: bar3dData, shading: 'lambert', label: { show: false }, emphasis: { label: { show: false } } }],
     };
 
-    return { chartOptions: { bar, histogram, line, scatter, pie, bar3d } };
-  }, [papers, theme]);
+    return { chartOptions: { bar, histogram, line, scatter: scatterOpt, pie, bar3d } };
+  }, [data, theme]);
 
   const s = { height: '100%', width: '100%' };
 

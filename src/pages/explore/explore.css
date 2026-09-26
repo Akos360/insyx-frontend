@@ -140,15 +140,21 @@
   outline-offset: 2px;
 }
 
-@media (max-width: 768px) {
-  .exploreRoot {
-    padding: 12px;
-  }
-
+/* @container reacts to .appShellContent's actual width, not the raw window
+   — see app-shell.css. Collapses earlier than a typical mobile breakpoint
+   since each cell embeds a live chart/map/table preview that gets illegibly
+   squished in a cramped 2x2 grid. */
+@container (max-width: 1024px) {
   .exploreGrid {
     min-height: auto;
     grid-template-columns: 1fr;
     grid-template-rows: repeat(4, minmax(180px, 1fr));
     gap: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .exploreRoot {
+    padding: 12px;
   }
 }

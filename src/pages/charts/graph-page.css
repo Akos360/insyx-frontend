@@ -7,7 +7,7 @@
 .graphPanel {
   display: flex;
   flex-direction: column;
-  height: 320px;
+  min-height: 320px;
   border-right: 1px solid var(--app-border);
   border-bottom: 1px solid var(--app-border);
   background: var(--app-surface);
@@ -18,7 +18,7 @@
 }
 
 .graphPanel--tall {
-  height: 440px;
+  min-height: 440px;
 }
 
 .graphPanelHeader {
@@ -77,17 +77,24 @@
   color: #e05c5c;
 }
 
-@media (max-width: 768px) {
+/* @container reacts to .appShellContent's actual width, not the raw window
+   — see app-shell.css */
+@container (max-width: 1024px) {
   .graphPage {
     grid-template-columns: 1fr;
   }
 
   .graphPanel {
     border-right: none;
-    height: 280px;
+  }
+}
+
+@container (max-width: 640px) {
+  .graphPanel {
+    min-height: 280px;
   }
 
   .graphPanel--tall {
-    height: 380px;
+    min-height: 380px;
   }
 }

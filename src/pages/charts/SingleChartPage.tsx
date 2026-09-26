@@ -3,18 +3,14 @@ import { useMemo, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BsArrowLeft, BsGrid } from 'react-icons/bs';
-import { getAllPapers, type Paper } from '../../api/papers';
+import {
+  getStatsByYear, getStatsByField, getStatsScatter, getStatsOaByYear, getStatsFieldPeriod,
+  getWorkFields, type ChartFilters,
+} from '../../api/works';
 import { CHART_LIST } from '../../charts/chartList';
-import { buildChartOption, makeThemeColors } from '../../charts/buildChartOption';
+import { buildChartOption, makeThemeColors, type ChartStatsData } from '../../charts/buildChartOption';
 import { useTheme } from '../../theme/useTheme';
 import './single-chart-page.css';
-
-// ---------------------------------------------------------------------------
-// Derive unique sorted values from the dataset for filter dropdowns
-// ---------------------------------------------------------------------------
-function uniqueSorted<T>(arr: T[]): T[] {
-  return [...new Set(arr)].sort() as T[];
-}
 
 export default function SingleChartPage() {
   const { chartId = 'papers-by-field' } = useParams<{ chartId: string }>();
@@ -24,45 +20,47 @@ export default function SingleChartPage() {
   const meta = CHART_LIST.find(c => c.id === chartId) ?? CHART_LIST[0];
   const idx  = CHART_LIST.indexOf(meta);
 
-  // ── data ──────────────────────────────────────────────────────────────────
-  const { data: papers = [], isLoading, isError } = useQuery({
-    queryKey: ['papers'],
-    queryFn: getAllPapers,
-  });
-
   // ── filter state ──────────────────────────────────────────────────────────
-  const years  = useMemo(() => uniqueSorted(papers.map(p => p.publicationYear).filter(Boolean)), [papers]);
-  const fields = useMemo(() => uniqueSorted(papers.map(p => p.field).filter(Boolean)),           [papers]);
+  const [yearFrom, setYearFrom] = useState<number | ''>('');
+  const [yearTo,   setYearTo]   = useState<number | ''>('');
+  const [field,    setField]    = useState('');
+  const [oaFilter, setOaFilter] = useState<'all' | 'open' | 'closed'>('all');
 
-  const minYear = years[0]  ?? 2012;
-  const maxYear = years[years.length - 1] ?? 2024;
+  const { data: fields = [] } = useQuery({ queryKey: ['work-fields'], queryFn: getWorkFields });
 
-  const [yearFrom,    setYearFrom]    = useState<number | ''>('');
-  const [yearTo,      setYearTo]      = useState<number | ''>('');
-  const [selFields,   setSelFields]   = useState<string[]>([]);
-  const [oaFilter,    setOaFilter]    = useState<'all' | 'open' | 'closed'>('all');
+  const filters: ChartFilters = useMemo(() => ({
+    yearFrom: yearFrom === '' ? undefined : yearFrom,
+    yearTo: yearTo === '' ? undefined : yearTo,
+    field: field || undefined,
+    is_oa: oaFilter === 'all' ? undefined : oaFilter === 'open',
+  }), [yearFrom, yearTo, field, oaFilter]);
 
-  function toggleField(f: string) {
-    setSelFields(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
-  }
+  const filterKey = JSON.stringify(filters);
 
-  // ── apply filters ─────────────────────────────────────────────────────────
-  const filtered: Paper[] = useMemo(() => {
-    return papers.filter(p => {
-      if (yearFrom !== '' && p.publicationYear < (yearFrom as number)) return false;
-      if (yearTo   !== '' && p.publicationYear > (yearTo   as number)) return false;
-      if (selFields.length > 0 && !selFields.includes(p.field))        return false;
-      if (oaFilter === 'open'   && !p.isOa)                            return false;
-      if (oaFilter === 'closed' &&  p.isOa)                            return false;
-      return true;
-    });
-  }, [papers, yearFrom, yearTo, selFields, oaFilter]);
+  // ── data ──────────────────────────────────────────────────────────────────
+  const { data: byYear = [], isLoading: l1, isError: e1 } = useQuery({ queryKey: ['stats', 'by-year', filterKey], queryFn: () => getStatsByYear(filters) });
+  const { data: byField = [], isLoading: l2, isError: e2 } = useQuery({ queryKey: ['stats', 'by-field', filterKey], queryFn: () => getStatsByField(filters) });
+  const { data: scatter = [], isLoading: l3, isError: e3 } = useQuery({ queryKey: ['stats', 'scatter', filterKey], queryFn: () => getStatsScatter(filters) });
+  const { data: oaByYear = [], isLoading: l4, isError: e4 } = useQuery({ queryKey: ['stats', 'oa-ratio', filterKey], queryFn: () => getStatsOaByYear(filters) });
+  const { data: fieldPeriod = [], isLoading: l5, isError: e5 } = useQuery({ queryKey: ['stats', 'field-period', filterKey], queryFn: () => getStatsFieldPeriod(filters) });
+
+  const isLoading = l1 || l2 || l3 || l4 || l5;
+  const isError = e1 || e2 || e3 || e4 || e5;
+
+  const data: ChartStatsData = useMemo(
+    () => ({ byYear, byField, scatter, oaByYear, fieldPeriod }),
+    [byYear, byField, scatter, oaByYear, fieldPeriod],
+  );
+
+  // Total paper count for the current filter set, shown in the footer — derived
+  // from whichever stat is cheapest to sum (by-year covers the whole corpus).
+  const totalCount = useMemo(() => byYear.reduce((s, r) => s + r.paper_count, 0), [byYear]);
 
   // ── chart option ──────────────────────────────────────────────────────────
   const option = useMemo(() => {
     const ct = makeThemeColors(theme === 'dark');
-    return buildChartOption(chartId, filtered, ct);
-  }, [chartId, filtered, theme]);
+    return buildChartOption(chartId, data, ct);
+  }, [chartId, data, theme]);
 
   // ── navigation between charts ─────────────────────────────────────────────
   const prevChart = () => navigate(`/graph/${CHART_LIST[(idx - 1 + CHART_LIST.length) % CHART_LIST.length].id}`);
@@ -93,19 +91,14 @@ export default function SingleChartPage() {
           {isLoading && <div className="scStatus">Loading data…</div>}
           {isError   && <div className="scStatus scStatusError">Failed to load data.</div>}
           {!isLoading && !isError && (
-            <>
-              {filtered.length === 0
-                ? <div className="scStatus">No papers match the current filters.</div>
-                : <ReactECharts
-                    key={`${chartId}-${theme}`}
-                    option={option}
-                    notMerge
-                    style={{ width: '100%', height: '100%' }}
-                  />
-              }
-            </>
+            <ReactECharts
+              key={`${chartId}-${theme}`}
+              option={option}
+              notMerge
+              style={{ width: '100%', height: '100%' }}
+            />
           )}
-          <div className="scCount">{filtered.length.toLocaleString()} papers</div>
+          <div className="scCount">{totalCount.toLocaleString()} papers</div>
         </div>
 
         {/* ── filter sidebar ── */}
@@ -116,9 +109,7 @@ export default function SingleChartPage() {
               <input
                 type="number"
                 className="scYearInput"
-                placeholder={String(minYear)}
-                min={minYear}
-                max={maxYear}
+                placeholder="From"
                 value={yearFrom}
                 onChange={e => setYearFrom(e.target.value === '' ? '' : Number(e.target.value))}
               />
@@ -126,9 +117,7 @@ export default function SingleChartPage() {
               <input
                 type="number"
                 className="scYearInput"
-                placeholder={String(maxYear)}
-                min={minYear}
-                max={maxYear}
+                placeholder="To"
                 value={yearTo}
                 onChange={e => setYearTo(e.target.value === '' ? '' : Number(e.target.value))}
               />
@@ -155,28 +144,25 @@ export default function SingleChartPage() {
             <div className="scFilterSection scFilterSectionFields">
               <div className="scFilterLabel">
                 Field
-                {selFields.length > 0 && (
-                  <button className="scClearBtn" onClick={() => setSelFields([])}>clear</button>
+                {field && (
+                  <button className="scClearBtn" onClick={() => setField('')}>clear</button>
                 )}
               </div>
-              <div className="scFieldList">
-                {fields.map(f => (
-                  <label key={f} className="scCheckLabel">
-                    <input
-                      type="checkbox"
-                      checked={selFields.includes(f)}
-                      onChange={() => toggleField(f)}
-                    />
-                    {f}
-                  </label>
-                ))}
-              </div>
+              <select
+                className="scYearInput"
+                style={{ width: '100%' }}
+                value={field}
+                onChange={e => setField(e.target.value)}
+              >
+                <option value="">All fields</option>
+                {fields.map(f => <option key={f} value={f}>{f}</option>)}
+              </select>
             </div>
           )}
 
           <button
             className="scResetBtn"
-            onClick={() => { setYearFrom(''); setYearTo(''); setSelFields([]); setOaFilter('all'); }}
+            onClick={() => { setYearFrom(''); setYearTo(''); setField(''); setOaFilter('all'); }}
           >
             Reset all filters
           </button>

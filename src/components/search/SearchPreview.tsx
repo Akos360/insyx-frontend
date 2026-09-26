@@ -1,28 +1,22 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsSearch } from "react-icons/bs";
-import { getAllPapers, type Paper } from "../../api/papers";
+import { searchWorks, type Work } from "../../api/works";
 import "./SearchPreview.css";
 
 export default function SearchPreview() {
-  const [papers, setPapers] = useState<Paper[]>([]);
+  const [items, setItems] = useState<Work[]>([]);
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    getAllPapers().then(setPapers).catch(() => {});
-  }, []);
-
-  const results = useMemo(() => {
-    const q = query.toLowerCase();
-    if (!q) return papers;
-    return papers.filter(
-      (p) =>
-        p.title.toLowerCase().includes(q) ||
-        p.authors?.toLowerCase().includes(q) ||
-        p.field?.toLowerCase().includes(q)
-    );
-  }, [papers, query]);
+    const t = setTimeout(() => {
+      searchWorks({ search: query || undefined, limit: 20 })
+        .then((page) => setItems(page.items))
+        .catch(() => {});
+    }, 300);
+    return () => clearTimeout(t);
+  }, [query]);
 
   return (
     <div className="searchPreview">
@@ -49,15 +43,15 @@ export default function SearchPreview() {
             </tr>
           </thead>
           <tbody>
-            {results.map((p) => (
+            {items.map((w) => (
               <tr
-                key={p.id}
+                key={w.id}
                 className="searchPreviewTr"
-                onClick={(e) => { e.stopPropagation(); navigate(`/paper/${p.id}`); }}
+                onClick={(e) => { e.stopPropagation(); navigate(`/paper/${w.id}`); }}
               >
-                <td className="searchPreviewTd searchPreviewTdTitle">{p.title}</td>
-                <td className="searchPreviewTd searchPreviewTdR">{p.publicationYear}</td>
-                <td className="searchPreviewTd searchPreviewTdR">{p.citedByCount?.toLocaleString()}</td>
+                <td className="searchPreviewTd searchPreviewTdTitle">{w.title}</td>
+                <td className="searchPreviewTd searchPreviewTdR">{w.publication_year}</td>
+                <td className="searchPreviewTd searchPreviewTdR">{w.cited_by_count?.toLocaleString()}</td>
               </tr>
             ))}
           </tbody>

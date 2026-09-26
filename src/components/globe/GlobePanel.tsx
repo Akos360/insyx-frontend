@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { IoClose, IoChevronBack, IoSearch } from "react-icons/io5";
 import { BsBuilding, BsFileText, BsGlobe } from "react-icons/bs";
 import {
   searchInstitutions as apiSearchInstitutions,
   getInstitutionWorks,
+  searchWorks,
+  getWork,
   type InstitutionSummary,
-} from "../../api/institutions";
-import { searchPapers, type Paper } from "../../api/papers";
+  type Work,
+} from "../../api/works";
+import { humanizeAuthors } from "../../utils/authorNames";
 import type { ClickedInstitution } from "./MapGlobe";
 import "./GlobePanel.css";
 
@@ -16,8 +20,8 @@ import "./GlobePanel.css";
 
 type NavEntry =
   | { kind: "home" }
-  | { kind: "institution"; inst: ClickedInstitution; works: Paper[] | null; loading: boolean }
-  | { kind: "work"; paper: Paper };
+  | { kind: "institution"; inst: ClickedInstitution; works: Work[] | null; loading: boolean }
+  | { kind: "work"; workId: string };
 
 // ---------------------------------------------------------------------------
 // Props
@@ -37,7 +41,7 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
   const [nav, setNav]               = useState<NavEntry[]>([{ kind: "home" }]);
   const [query, setQuery]           = useState("");
   const [instResults, setInstResults] = useState<InstitutionSummary[]>([]);
-  const [paperResults, setPaperResults] = useState<Paper[]>([]);
+  const [workResults, setWorkResults] = useState<Work[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -99,8 +103,8 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
     fetchWorks(inst.id);
   }
 
-  function openWork(paper: Paper) {
-    push({ kind: "work", paper });
+  function openWork(id: string) {
+    push({ kind: "work", workId: id });
   }
 
   // ---------------------------------------------------------------------------
@@ -112,19 +116,19 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
     if (searchTimer.current) clearTimeout(searchTimer.current);
     if (!q.trim()) {
       setInstResults([]);
-      setPaperResults([]);
+      setWorkResults([]);
       setIsSearching(false);
       return;
     }
     setIsSearching(true);
     searchTimer.current = setTimeout(async () => {
       try {
-        const [insts, papers] = await Promise.all([
+        const [insts, worksPage] = await Promise.all([
           apiSearchInstitutions(q),
-          searchPapers(q),
+          searchWorks({ search: q, limit: 20 }),
         ]);
         setInstResults(insts);
-        setPaperResults(papers);
+        setWorkResults(worksPage.items);
       } catch {
         // silently ignore
       } finally {
@@ -196,9 +200,9 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
         {showResults && (
           <ResultsView
             institutions={instResults}
-            papers={paperResults}
+            works={workResults}
             onInstitutionClick={openInstitution}
-            onPaperClick={openWork}
+            onWorkClick={openWork}
           />
         )}
         {showInstitution && current.kind === "institution" && (
@@ -206,11 +210,11 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
             inst={current.inst}
             works={current.works}
             loading={current.loading}
-            onPaperClick={openWork}
+            onWorkClick={openWork}
           />
         )}
         {showWork && current.kind === "work" && (
-          <WorkView paper={current.paper} />
+          <WorkView workId={current.workId} />
         )}
       </div>
     </div>
@@ -232,16 +236,16 @@ function HomeView() {
 
 function ResultsView({
   institutions,
-  papers,
+  works,
   onInstitutionClick,
-  onPaperClick,
+  onWorkClick,
 }: {
   institutions: InstitutionSummary[];
-  papers: Paper[];
+  works: Work[];
   onInstitutionClick: (i: InstitutionSummary) => void;
-  onPaperClick: (p: Paper) => void;
+  onWorkClick: (id: string) => void;
 }) {
-  const empty = institutions.length === 0 && papers.length === 0;
+  const empty = institutions.length === 0 && works.length === 0;
   return (
     <div>
       {empty && <p className="globePanelEmptyText">No results found.</p>}
@@ -266,19 +270,19 @@ function ResultsView({
         </section>
       )}
 
-      {papers.length > 0 && (
+      {works.length > 0 && (
         <section className="globePanelSection">
           <h4 className="globePanelSectionTitle">
-            Papers <span className="globePanelCount">{papers.length}</span>
+            Papers <span className="globePanelCount">{works.length}</span>
           </h4>
-          {papers.map((paper) => (
-            <button key={paper.id} className="globePanelCard" onClick={() => onPaperClick(paper)}>
+          {works.map((work) => (
+            <button key={work.id} className="globePanelCard" onClick={() => onWorkClick(work.id)}>
               <BsFileText size={13} className="globePanelCardIcon" />
               <div className="globePanelCardText">
-                <span className="globePanelCardName">{paper.title}</span>
+                <span className="globePanelCardName">{work.title}</span>
                 <span className="globePanelCardMeta">
-                  {paper.publicationYear}
-                  {paper.citedByCount > 0 && <> · {paper.citedByCount.toLocaleString()} citations</>}
+                  {work.publication_year}
+                  {work.cited_by_count > 0 && <> · {work.cited_by_count.toLocaleString()} citations</>}
                 </span>
               </div>
             </button>
@@ -293,12 +297,12 @@ function InstitutionView({
   inst,
   works,
   loading,
-  onPaperClick,
+  onWorkClick,
 }: {
   inst: ClickedInstitution;
-  works: Paper[] | null;
+  works: Work[] | null;
   loading: boolean;
-  onPaperClick: (p: Paper) => void;
+  onWorkClick: (id: string) => void;
 }) {
   return (
     <div>
@@ -325,14 +329,14 @@ function InstitutionView({
         <h4 className="globePanelSectionTitle">Papers</h4>
         {loading && <p className="globePanelEmptyText">Loading…</p>}
         {!loading && works?.length === 0 && <p className="globePanelEmptyText">No papers found.</p>}
-        {!loading && works?.map((paper) => (
-          <button key={paper.id} className="globePanelCard" onClick={() => onPaperClick(paper)}>
+        {!loading && works?.map((work) => (
+          <button key={work.id} className="globePanelCard" onClick={() => onWorkClick(work.id)}>
             <BsFileText size={13} className="globePanelCardIcon" />
             <div className="globePanelCardText">
-              <span className="globePanelCardName">{paper.title}</span>
+              <span className="globePanelCardName">{work.title}</span>
               <span className="globePanelCardMeta">
-                {paper.publicationYear}
-                {paper.citedByCount > 0 && <> · {paper.citedByCount.toLocaleString()} citations</>}
+                {work.publication_year}
+                {work.cited_by_count > 0 && <> · {work.cited_by_count.toLocaleString()} citations</>}
               </span>
             </div>
           </button>
@@ -342,20 +346,28 @@ function InstitutionView({
   );
 }
 
-function WorkView({ paper }: { paper: Paper }) {
+function WorkView({ workId }: { workId: string }) {
+  const { data: paper, isLoading, isError } = useQuery({
+    queryKey: ['works', 'detail', workId],
+    queryFn: () => getWork(workId),
+  });
+
+  if (isLoading) return <p className="globePanelEmptyText">Loading…</p>;
+  if (isError || !paper) return <p className="globePanelEmptyText">Paper not found.</p>;
+
   return (
     <div className="globePanelWorkDetail">
       <h3 className="globePanelWorkTitle">{paper.title}</h3>
 
       <div className="globePanelWorkMeta">
-        {paper.publicationYear && <span>{paper.publicationYear}</span>}
-        {paper.citedByCount > 0 && <span>{paper.citedByCount.toLocaleString()} citations</span>}
-        {paper.sourceName && <span>{paper.sourceName}</span>}
-        {paper.isOa && <span className="globePanelOaBadge">Open Access</span>}
+        {paper.publication_year && <span>{paper.publication_year}</span>}
+        {paper.cited_by_count > 0 && <span>{paper.cited_by_count.toLocaleString()} citations</span>}
+        {paper.source_name && <span>{paper.source_name}</span>}
+        {paper.is_oa && <span className="globePanelOaBadge">Open Access</span>}
       </div>
 
       {paper.authors && (
-        <p className="globePanelWorkAuthors">{paper.authors}</p>
+        <p className="globePanelWorkAuthors">{humanizeAuthors(paper.authors)}</p>
       )}
 
       {(paper.domain || paper.field || paper.subfield) && (
@@ -379,13 +391,13 @@ function WorkView({ paper }: { paper: Paper }) {
             DOI ↗
           </a>
         )}
-        {paper.pdfUrl && (
-          <a href={paper.pdfUrl} target="_blank" rel="noopener noreferrer" className="globePanelLink">
+        {paper.pdf_url && (
+          <a href={paper.pdf_url} target="_blank" rel="noopener noreferrer" className="globePanelLink">
             PDF ↗
           </a>
         )}
-        {paper.isOa && paper.oaUrl && (
-          <a href={paper.oaUrl} target="_blank" rel="noopener noreferrer" className="globePanelLink globePanelLinkOa">
+        {paper.is_oa && paper.oa_url && (
+          <a href={paper.oa_url} target="_blank" rel="noopener noreferrer" className="globePanelLink globePanelLinkOa">
             Open Access ↗
           </a>
         )}

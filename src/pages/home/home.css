@@ -1,12 +1,30 @@
 .homePage {
+  position: relative;
   min-height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 2.2fr) minmax(280px, 1fr);
   background: linear-gradient(135deg, var(--app-bg-elevated) 0%, var(--app-surface-strong) 100%);
+  overflow: hidden;
+}
+
+/* Fully hides the animated gradient (HeroGradient, an absolutely-positioned
+   sibling painted before this in the DOM) behind flat, opaque background
+   color out past where .homeHeroContent actually ends (~66% of the hero
+   column at typical widths) — the sphere should read as a distinct visual
+   beside the text, never spatially behind/through it. Fades to fully
+   transparent shortly after, so it's visible in the remaining gap before the
+   login panel and continues to show, blurred, behind the glass card itself. */
+.homeHeroScrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(100deg, var(--app-bg) 0%, var(--app-bg-elevated) 66%, transparent 85%);
+  pointer-events: none;
 }
 
 .homeHero {
   position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,6 +61,8 @@
 }
 
 .homePanel {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,13 +71,75 @@
   backdrop-filter: blur(8px);
 }
 
+/* Visual surface (blur/tint/border-radius) now comes from the LiquidGlass
+   wrapper itself (see HomePage.tsx). LiquidGlass bakes in a self-centering
+   `translate(-50%, -50%)` — it expects position:absolute + top/left:50% (per
+   its own docs), not a normal in-flow flex child, so .homePanel anchors it
+   via position:relative and this just sets its size. */
 .homePanelCard {
+  width: 380px;
+  max-width: calc(100% - 40px);
+}
+
+/* Every auth-page card switches between two or more content states (e.g.
+   HomePage: login <-> register; ForgotPasswordPage: form -> sent
+   confirmation; ResetPasswordPage: form -> validation-error state). Letting
+   height stay auto/content-driven depends on how each browser resolves a
+   percentage height (see the `.glass`/svg rule below) inside an otherwise
+   auto-sized, absolutely-positioned container — an under-specified CSS case
+   browsers can disagree on, which is what caused the card to sometimes not
+   resize for a taller state. Giving each page's card one fixed height
+   instead (tall enough for its own tallest state, measured directly) sides
+   steps that entirely: every state renders inside the same unambiguous box,
+   shorter states just sit with a bit more room at the bottom/center. */
+.homePanelCardFixed {
+  /* HomePage: register (tallest — email+2 passwords+button+divider+Google
+     button+switch line) measures ~571px including padding. */
+  height: 610px;
+  max-height: calc(100% - 40px);
+}
+
+.homePanelCardFixedForgot {
+  /* ForgotPasswordPage: form state (tallest — email field+button+back link,
+     plus room for an inline rate-limit/network error message) measures
+     ~330px including padding. */
+  height: 380px;
+  max-height: calc(100% - 40px);
+}
+
+.homePanelCardFixedReset {
+  /* ResetPasswordPage: form + inline error state (tallest — 2 password
+     fields+button+error message+"request new link") measures ~459px
+     including padding. */
+  height: 500px;
+  max-height: calc(100% - 40px);
+}
+
+/* LiquidGlass renders its actual visible surface in a nested `.glass` div,
+   plus a sibling <svg> holding the filter used for the distortion effect —
+   both sized independently by the library's own measurement rather than
+   filling this wrapper exactly (the <svg> in particular has been seen
+   matching a stale/previous width, e.g. this class's own `max-width` value
+   instead of the current rendered width), so their rounded-rect edges show
+   as a visible double border. Force both to fill this wrapper exactly
+   instead. Coupled to liquid-glass-react's internal markup — re-check after
+   upgrading it. */
+.homePanelCard > svg,
+.homePanelCard > .glass {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* `.glass` is a row-direction inline-flex box with our form content as its
+   only flex item — without an explicit grow/width, that item shrinks to fit
+   its content instead of filling `.glass`, which left an asymmetric gap on
+   the right (content pinned near its narrowest child's natural width, e.g.
+   the Google button) while the left padding stayed correct. Force it to
+   fill the available width so both side paddings end up equal. */
+.homePanelCard > .glass > div {
+  flex: 1 1 auto;
   width: 100%;
-  max-width: 320px;
-  padding: 28px;
-  border: 1px solid var(--app-border);
-  background: var(--app-surface);
-  box-shadow: 0 20px 48px var(--app-shadow);
+  min-width: 0;
 }
 
 .homePanelLabel {
@@ -89,9 +171,43 @@
 }
 
 .homeFieldLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   color: var(--app-text-muted);
   font-size: 0.85rem;
   font-weight: 600;
+}
+
+.homeForgotLink {
+  color: var(--app-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.homeForgotLink:hover {
+  text-decoration: underline;
+}
+
+.homeDivider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 14px;
+  color: var(--app-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.homeDivider::before,
+.homeDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--app-border);
 }
 
 .homeInput {
@@ -123,6 +239,28 @@
   font-weight: 700;
   transition: transform 140ms ease, background-color 140ms ease, color 140ms ease;
   cursor: pointer;
+}
+
+.homeCta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.homeError {
+  color: #e05c5c;
+  font-size: 0.85rem;
+}
+
+/* Honeypot — present in the DOM (so bots that fill every field still hit it)
+   but invisible and unreachable for a real user. */
+.homeHoneypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 .homeCta:hover {
@@ -178,9 +316,20 @@
     padding: 0 24px 24px;
     background: transparent;
     backdrop-filter: none;
+    /* LiquidGlass centers itself via position:absolute + top/left:50% (see
+       HomePage.tsx) and is out of normal flow, so it doesn't contribute to
+       this row's height in the stacked single-column layout — without an
+       explicit min-height the row (and the card's centering point) collapses,
+       and if this is SHORTER than the actual card, the centered card
+       overflows both above and below it instead of sitting inside it. Must
+       stay taller than the tallest variant (register: email + 2 passwords +
+       button + divider + Google button + switch-account line — currently
+       ~571px including padding) plus room for an inline error message. */
+    min-height: 640px;
   }
 
   .homePanelCard {
-    max-width: none;
+    width: calc(100% - 24px);
+    max-width: 420px;
   }
 }

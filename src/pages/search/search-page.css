@@ -182,6 +182,7 @@
 .searchTableWrap {
   flex: 1;
   overflow-y: auto;
+  overflow-x: auto;
 }
 
 .searchStatus {
@@ -192,6 +193,7 @@
 
 .searchTable {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
   font-size: 0.875rem;
 }
@@ -313,7 +315,7 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .searchToolbar {
     padding: 10px 12px;
   }

@@ -73,6 +73,38 @@
   border-color: var(--app-accent);
 }
 
+.topNavbarUser {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--app-text-muted);
+  white-space: nowrap;
+}
+
+.topNavbarLogout {
+  border: none;
+  background: transparent;
+  color: var(--app-accent);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.topNavbarLogout:hover {
+  color: var(--app-accent-strong);
+}
+
+@media (max-width: 1024px) {
+  .topNavbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
 @media (max-width: 768px) {
   .topNavbar {
     height: auto;

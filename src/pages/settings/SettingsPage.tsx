@@ -1,8 +1,15 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../auth/useAuth";
 import "./settings.css";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  async function handleLogout() {
+    await logout();
+    navigate("/");
+  }
 
   return (
     <main className="settingsPage">
@@ -20,7 +27,7 @@ export default function SettingsPage() {
 
           <label className="settingsField">
             <span className="settingsFieldLabel">Email</span>
-            <input type="email" className="settingsInput" defaultValue="user@example.com" />
+            <input type="email" className="settingsInput" value={user?.email ?? ""} readOnly />
           </label>
 
           <label className="settingsField">
@@ -33,7 +40,7 @@ export default function SettingsPage() {
           <button type="submit" className="settingsSaveButton">
             Save
           </button>
-          <button type="button" className="settingsLogoutButton" onClick={() => navigate("/")}>
+          <button type="button" className="settingsLogoutButton" onClick={handleLogout}>
             Logout
           </button>
         </div>

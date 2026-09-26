@@ -17,6 +17,9 @@
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
+  /* Query container for every routed page — lets nested panels/grids react to
+     the space actually left after the sidebar, not the raw window width. */
+  container-type: inline-size;
 }
 
 

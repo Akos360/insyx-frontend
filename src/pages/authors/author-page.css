@@ -412,11 +412,54 @@
   background: var(--app-surface);
 }
 
-/* responsive */
-@media (max-width: 720px) {
+.searchPagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 10px 14px;
+}
+
+.searchPaginationRange,
+.searchPaginationPage {
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
+  white-space: nowrap;
+}
+
+.searchPaginationBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--app-border);
+  background: transparent;
+  color: var(--app-text);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.searchPaginationBtn:hover:not(:disabled) {
+  background: var(--app-overlay);
+}
+
+.searchPaginationBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* responsive (@container reacts to .appShellContent's actual width, not the
+   raw window — see app-shell.css) */
+@container (max-width: 1024px) {
   .authorBody {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 640px) {
   .authorsRoot,
   .authorPage {
     padding: 16px;
