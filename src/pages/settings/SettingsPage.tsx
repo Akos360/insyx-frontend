@@ -1,48 +1,47 @@
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/useAuth";
+import { LuMonitor, LuMoon, LuSun } from "react-icons/lu";
+import { useTheme } from "../../theme/useTheme";
+import type { ThemePreference } from "../../theme/theme-context";
 import "./settings.css";
 
-export default function SettingsPage() {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+const THEME_OPTIONS: Array<{ value: ThemePreference; label: string; icon: typeof LuSun }> = [
+  { value: "dark", label: "Dark", icon: LuMoon },
+  { value: "light", label: "Light", icon: LuSun },
+  { value: "system", label: "System", icon: LuMonitor },
+];
 
-  async function handleLogout() {
-    await logout();
-    navigate("/");
-  }
+export default function SettingsPage() {
+  const { themePreference, setThemePreference } = useTheme();
 
   return (
     <main className="settingsPage">
-      <section className="settingsCard">
-        <div className="settingsHeader">
-          <p className="settingsEyebrow">Settings</p>
-          <h1 className="settingsTitle">Account Preferences</h1>
+      <div className="settingsHeader">
+        <p className="settingsEyebrow">Settings</p>
+        <h1 className="settingsTitle">Preferences</h1>
+      </div>
+
+      <section className="uiCard settingsCard">
+        <div className="uiCardHead">
+          <div className="uiCardTitle">
+            <span>Appearance</span>
+          </div>
         </div>
-
-        <form className="settingsForm">
-          <label className="settingsField">
-            <span className="settingsFieldLabel">Name</span>
-            <input type="text" className="settingsInput" defaultValue="User Name" />
-          </label>
-
-          <label className="settingsField">
-            <span className="settingsFieldLabel">Email</span>
-            <input type="email" className="settingsInput" value={user?.email ?? ""} readOnly />
-          </label>
-
-          <label className="settingsField">
-            <span className="settingsFieldLabel">Password</span>
-            <input type="password" className="settingsInput" placeholder="Change password" />
-          </label>
-        </form>
-
-        <div className="settingsFooter">
-          <button type="submit" className="settingsSaveButton">
-            Save
-          </button>
-          <button type="button" className="settingsLogoutButton" onClick={handleLogout}>
-            Logout
-          </button>
+        <div className="settingsSection">
+          <p className="settingsSectionDesc">Choose how Insyx looks on this device.</p>
+          <div className="uiSeg" role="radiogroup" aria-label="Theme">
+            {THEME_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                role="radio"
+                aria-checked={themePreference === option.value}
+                className={"uiSegBtn" + (themePreference === option.value ? " uiSegOn" : "")}
+                onClick={() => setThemePreference(option.value)}
+              >
+                <option.icon aria-hidden="true" />
+                <span>{option.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </section>
     </main>

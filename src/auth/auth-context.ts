@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { AuthUser, Credentials } from "../api/auth";
+import type { AuthUser, Credentials, ProfileUpdate } from "../api/auth";
 
 export type AuthContextValue = {
   user: AuthUser | null;
@@ -9,6 +9,7 @@ export type AuthContextValue = {
   logout: () => Promise<void>;
   loginWithGoogle: (idToken: string) => Promise<void>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;
+  updateProfile: (update: ProfileUpdate) => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

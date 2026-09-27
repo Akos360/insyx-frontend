@@ -1,7 +1,7 @@
 export interface ChartMeta {
   id: string;
   title: string;
-  /** True if this chart uses echarts-gl (3D) — only rendered in GraphPage */
+  /** Uses echarts-gl (3D); only rendered in GraphPage. */
   is3d?: boolean;
 }
 

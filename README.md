@@ -14,17 +14,26 @@ React SPA for Insyx — a Science-of-Science Explorer. Allows browsing, searchin
 - `echarts-gl` — 3D charts (bar3D, surface3D, scatter3D)
 - `MapLibre GL JS` — vector tile globe with full zoom quality
 - `@shadergradient/react` + `@react-three/fiber` + `three` — animated 3D gradient backdrop on the landing/auth pages (lazy-loaded, only on those pages)
-- `liquid-glass-react` — frosted-glass login/register card effect
-- `React Icons` — icon library
+- `liquid-glass-react` — frosted-glass login/register card effect (login/register page only)
+- `React Icons` (`react-icons/lu`, Lucide set) — icon library for the redesigned app shell/pages
+- `IBM Plex Sans` / `IBM Plex Mono` — UI and tabular-number typefaces, loaded from Google Fonts
 - `Vitest` + `@testing-library/react` — unit tests
 - `ESLint` — linting
 - `Nginx` + `Docker` — production static hosting
 
 ## Authentication
 
-Login, registration, "forgot password", and Google sign-in all live on `/` (and `/forgot-password`, `/reset-password`). Sessions are httpOnly cookies set by the backend — the frontend never touches the token directly; `AuthContext`/`useAuth` (`src/auth/`) hydrate the current user by calling `/auth/me` on load. `RequireAuth` (`src/components/auth/`) gates routes that need a logged-in user — currently only `/settings`; every bibliometric browsing page stays public.
+Login, registration, "forgot password", and Google sign-in all live on `/` (and `/forgot-password`, `/reset-password`). Sessions are httpOnly cookies set by the backend — the frontend never touches the token directly; `AuthContext`/`useAuth` (`src/auth/`) hydrate the current user by calling `/auth/me` on load. `RequireAuth` (`src/components/auth/`) gates routes that need a logged-in user — `/settings` and `/account`; every bibliometric browsing page stays public.
 
 Google sign-in needs a real `VITE_GOOGLE_CLIENT_ID` (see below) to actually work — the button renders either way, but authentication will fail against a placeholder ID.
+
+Profile editing (name/email/affiliation/password) lives on `/account`, not `/settings` — `/settings` is appearance-only (theme). Both are reachable from the avatar menu in the top bar.
+
+## Design System
+
+The app shell (sidebar, top bar, avatar menu) and the Search/Paper/Account/Settings pages follow a token-based design system ported from an external design-handoff mockup (not part of this repo): colors/spacing/typography as CSS custom properties in `src/App.css` (`--bg`, `--panel`, `--primary`, `--c1`…`--c5` for field colors, etc.), plus shared component classes in `src/styles/ui-kit.css` (`uiCard`, `uiBtn`, `uiTag`, `uiInput`, skeleton/progress loading states). Older `--app-*` custom properties are kept as aliases onto the same tokens for pages not yet migrated onto the plain names.
+
+Theme is three-way (Dark / Light / System), controlled only from `/settings`, persisted to `localStorage`, and applied via `data-theme` on `<html>` (removed entirely for "System", which falls back to `prefers-color-scheme`).
 
 ## Environment Variables
 
@@ -48,15 +57,18 @@ cp .env.example .env
 | `/forgot-password` | `ForgotPasswordPage` | Request a password-reset link |
 | `/reset-password` | `ResetPasswordPage` | Set a new password from a reset link (`?token=`) |
 | `/explore` | `ExplorePage` | Overview cards for all modules |
-| `/search` | `SearchPage` | Paper search with filters and sortable table |
-| `/paper/:id` | `PaperPage` | Single paper detail (metadata, abstract, keywords) |
+| `/search` | `SearchPage` | Paper search: query/field/sort toolbar, domain/year/OA filters, CSV export, sortable table |
+| `/paper/:id` | `PaperPage` | Single paper detail (type/domain/field tags, stats, topics, authors, institutions) |
 | `/authors` | `AuthorsPage` | Author list with paper counts |
 | `/author/:authorId` | `AuthorPage` | Single author detail with publication list |
 | `/graph` | `GraphPage` | Chart gallery overview |
 | `/graph/:chartId` | `SingleChartPage` | Full-screen individual chart |
-| `/globe` | `GlobePage` | Zoomable vector globe with institution pins |
+| `/globe` | `GlobePage` | Zoomable vector globe (institution markers currently disabled, see note below) |
 | `/explore-net` | `ExploreNetPage` | Citation network graph |
-| `/settings` | `SettingsPage` | Account preferences (requires login) |
+| `/settings` | `SettingsPage` | Appearance/theme only (requires login) |
+| `/account` | `AccountPage` | Personal details, password, sessions (requires login) |
+
+> **Globe institution markers:** temporarily disabled (`MapGlobe.tsx` no longer fetches/renders `/works/institutions/map`) — the base globe/map itself works; only the per-institution overlay is off pending a bbox-validation fix on the backend query. maplibre-gl's tile worker also needed two build-time fixes to load at all under Vite/nginx — see `scripts/copy-maplibre-worker.mjs` and the `.mjs` MIME-type block in `nginx.conf`.
 
 ## Project Structure
 
@@ -77,7 +89,7 @@ insyx-frontend/
 │   │   ├── buildChartOption.ts   # ECharts option builders
 │   │   └── useWorksStats.ts      # Shared stats-fetching hook (GraphPage + GraphPreview)
 │   ├── components/
-│   │   ├── layout/               # AppShell, Navbar, Sidebar, ThemeToggle
+│   │   ├── layout/               # AppShell, Navbar, Sidebar (collapsible), AvatarMenu, ThemeToggle
 │   │   ├── auth/                 # RequireAuth route guard, GoogleSignInButton
 │   │   ├── globe/                # MapGlobe, GlobePanel (MapLibre GL)
 │   │   ├── charts/                # GraphPreview
@@ -92,12 +104,20 @@ insyx-frontend/
 │   │   ├── charts/                 # GraphPage, SingleChartPage
 │   │   ├── globe/                  # GlobePage
 │   │   ├── network/                # ExploreNetPage
-│   │   └── settings/                # SettingsPage (behind RequireAuth)
+│   │   ├── settings/                # SettingsPage — appearance only (behind RequireAuth)
+│   │   └── account/                 # AccountPage — profile/password/sessions (behind RequireAuth)
+│   ├── styles/
+│   │   └── ui-kit.css            # Shared design-system component classes (uiCard, uiBtn, uiTag, …)
+│   ├── utils/
+│   │   ├── authorNames.ts
+│   │   └── fieldColor.ts         # Field → --c1..--c5 color mapping, shared by Search/Paper pages
 │   ├── theme/
-│   │   ├── ThemeContext.tsx      # Light/dark theme provider
+│   │   ├── ThemeContext.tsx      # Dark/Light/System theme provider
 │   │   └── useTheme.ts
 │   └── test/
 │       └── setup.ts              # Vitest + jest-dom setup
+├── scripts/
+│   └── copy-maplibre-worker.mjs  # predev/prebuild: copies maplibre-gl's worker into public/vendor/
 ├── public/
 ├── .env.example
 ├── index.html

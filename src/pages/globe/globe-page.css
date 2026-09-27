@@ -22,14 +22,14 @@
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 22px;
-  height: 52px;
+  width: 28px;
+  height: 60px;
   background: var(--app-surface-strong);
   border: 1px solid var(--app-border);
   border-right: none;
-  border-radius: 5px 0 0 5px;
+  border-radius: 6px 0 0 6px;
   color: var(--app-text-muted);
-  font-size: 1rem;
+  font-size: 1.2rem;
   display: flex;
   align-items: center;
   justify-content: center;

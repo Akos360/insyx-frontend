@@ -4,8 +4,7 @@ import { useAuth } from "../../auth/useAuth";
 import { useTheme } from "../../theme/useTheme";
 import "./google-sign-in-button.css";
 
-// Minimal shape of the Google Identity Services API this component actually
-// uses — the full API surface isn't published as an npm types package.
+// Minimal shape used here — Google Identity Services has no npm types package.
 type GoogleCredentialResponse = { credential: string };
 type GoogleIdentityServices = {
   accounts: {
@@ -55,8 +54,7 @@ type GoogleSignInButtonProps = {
   onError?: (message: string) => void;
 };
 
-// Only mounted on HomePage — the script is loaded on demand, not app-wide,
-// matching the lazy-loading approach already used for HeroGradient/GlobePage.
+// Loaded on demand (only mounted on HomePage), matching HeroGradient/GlobePage's lazy-loading.
 export default function GoogleSignInButton({ onError }: GoogleSignInButtonProps) {
   const { theme } = useTheme();
   const { loginWithGoogle } = useAuth();

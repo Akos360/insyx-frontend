@@ -1,0 +1,121 @@
+.accountPage {
+  min-height: calc(100vh - 64px);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 640px;
+}
+
+.accountHeader {
+  margin-bottom: 4px;
+}
+
+.accountEyebrow {
+  margin: 0 0 8px;
+  color: var(--text-3);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.accountTitle {
+  margin: 0;
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  color: var(--text);
+}
+
+.accountForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+
+.accountPhotoRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.accountPhoto {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.accountPhotoHelp {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+.accountField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.accountFieldLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.accountError {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+.accountSuccess {
+  margin: 0;
+  color: var(--accent-text);
+  font-size: 0.85rem;
+}
+
+.accountFormFooter {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.accountActionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.accountActionTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.accountActionHelp {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+@media (max-width: 640px) {
+  .accountPage {
+    padding: 16px;
+  }
+
+  .accountActionRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}

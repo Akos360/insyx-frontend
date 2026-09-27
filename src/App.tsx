@@ -13,6 +13,7 @@ import SingleChartPage from "./pages/charts/SingleChartPage";
 import ExplorePage from "./pages/explore/ExplorePage";
 import SearchPage from "./pages/search/SearchPage";
 import SettingsPage from "./pages/settings/SettingsPage";
+import AccountPage from "./pages/account/AccountPage";
 import AuthorsPage from "./pages/authors/AuthorsPage";
 import AuthorPage from "./pages/authors/AuthorPage";
 import { ThemeProvider } from "./theme/ThemeContext";
@@ -39,6 +40,7 @@ export default function App() {
               <Route path="/author/:authorId" element={<AuthorPage />} />
               <Route element={<RequireAuth />}>
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/account" element={<AccountPage />} />
               </Route>
               <Route path="/globe" element={
                 <Suspense fallback={<div />}>

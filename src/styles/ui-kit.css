@@ -1,0 +1,309 @@
+/*
+ * Shared component primitives for the redesign, ported from
+ * insyx-design-handoff/components.reference.css onto our own token names.
+ * Classes are "ui"-prefixed to avoid colliding with Bootstrap's globally
+ * imported base styles (e.g. its own .btn/.card). Grows page by page as more
+ * of the redesign lands; not every mockup component has a class here yet.
+ */
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.uiBtn {
+  height: 40px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.uiBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.uiBtnPrimary {
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  color: #fff;
+}
+
+.uiBtnPrimary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.uiBtnSecondary {
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+}
+
+.uiBtnSecondary:hover {
+  background: var(--hover);
+}
+
+.uiBtnGhost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-2);
+}
+
+.uiBtnGhost:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.uiBtnDanger {
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+
+.uiBtnDanger:hover {
+  background: var(--danger-soft);
+}
+
+.uiBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.uiSeg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+}
+
+.uiSegBtn {
+  height: 32px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.uiSegBtn:hover {
+  color: var(--text);
+}
+
+.uiSegOn {
+  background: var(--panel);
+  border-color: var(--border-strong);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.uiCard {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.uiCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 52px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.uiCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.uiCardTitle svg {
+  color: var(--text-3);
+  width: 16px;
+  height: 16px;
+}
+
+.uiInput {
+  height: 40px;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  padding: 0 12px;
+  font-family: inherit;
+}
+
+.uiInput:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
+}
+
+.uiInput:read-only {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.uiFieldLabel {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.uiTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--panel-2);
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.uiTagAccent {
+  border-color: transparent;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.uiTagMuted {
+  background: transparent;
+}
+
+.uiTagDot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  border-radius: 999px;
+}
+
+.uiKv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13.5px;
+  min-height: 36px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.uiKv:last-child {
+  border-bottom: none;
+}
+
+.uiKv > span:first-child {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+.uiKv > span:last-child,
+.uiKv > a:last-child {
+  color: var(--text);
+  font-weight: 500;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uiBtnActive {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent-text);
+}
+
+.uiCheck {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text);
+  min-height: 32px;
+  cursor: pointer;
+}
+
+.uiCheck input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Loading pattern shared across pages: a thin indeterminate bar under a card
+   header, plus skeleton rows shaped like the incoming content. */
+.uiProgress {
+  height: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.uiProgressBar {
+  height: 100%;
+  width: 30%;
+  background: var(--primary);
+  animation: uiIndeterminate 1.6s ease-in-out infinite;
+}
+
+.uiSkel {
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--skel-a) 0%, var(--skel-b) 50%, var(--skel-a) 100%);
+  background-size: 200% 100%;
+  animation: uiShimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes uiShimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@keyframes uiIndeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(340%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uiSkel,
+  .uiProgressBar {
+    animation-duration: 4s;
+  }
+}

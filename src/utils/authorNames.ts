@@ -1,7 +1,5 @@
-// The seeded lakehouse demo data (insyx-database, a separate repo we don't edit)
-// generates placeholder author names as "Author 114", "Author 1876", etc. This maps
-// each placeholder to a deterministic, readable display name — same number always
-// renders the same name, purely a presentation-layer transform, no data is changed.
+// Maps seeded placeholder names ("Author 114") to deterministic, readable display
+// names — presentation-only, same number always maps to the same name.
 
 const FIRST_NAMES = [
   "James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda",

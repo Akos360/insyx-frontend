@@ -1,17 +1,9 @@
 import { ShaderGradientCanvas, ShaderGradient } from "@shadergradient/react";
 import { useTheme } from "../../theme/useTheme";
 
-// Ambient animated backdrop for the landing hero — a slow-drifting 3D sphere,
-// a deliberate nod to the app's own institution globe. Colors are the app's
-// existing brand anchors (App.css --twilight-indigo/--rich-cerulean/
-// --frozen-water) so it reads as part of the same identity, not a generic
-// demo gradient. Lazy-loaded (see HomePage) since three.js/@react-three/fiber
-// are only needed on this one page.
-//
-// Full-bleed canvas (the sphere's camera framing is tuned against the whole
-// page's aspect ratio — narrowing the canvas element itself distorts that).
-// Staying clear of the hero text is handled by .homeHeroScrim instead, which
-// stays fully opaque out past where the text column ends.
+// Lazy-loaded on HomePage since three.js/@react-three/fiber are only needed here.
+// Must stay full-bleed — the sphere's camera framing is tuned to the page's aspect
+// ratio, so narrowing the canvas distorts it. Text clearance is handled by .homeHeroScrim instead.
 export default function HeroGradient() {
   const { theme } = useTheme();
   const reduceMotion =

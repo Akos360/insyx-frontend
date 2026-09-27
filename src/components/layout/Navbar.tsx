@@ -1,52 +1,57 @@
-import { Link, useNavigate } from "react-router-dom";
-import { BsSkipStartFill } from "react-icons/bs";
-import ThemeToggle from "./ThemeToggle";
+import { Link, useLocation } from "react-router-dom";
+import { LuMenu, LuPlus } from "react-icons/lu";
 import { useAuth } from "../../auth/useAuth";
+import AvatarMenu from "./AvatarMenu";
 import "./navbar.css";
 
-export default function Navbar() {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+const TITLES: Array<[string, string]> = [
+  ["/explore", "Overview"],
+  ["/search", "Search"],
+  ["/authors", "Authors"],
+  ["/author/", "Author"],
+  ["/explore-net", "Explore Net"],
+  ["/graph", "Graph"],
+  ["/paper/", "Paper"],
+  ["/globe", "Globe"],
+  ["/settings", "Settings"],
+  ["/account", "Profile"],
+];
 
-  async function handleLogout() {
-    await logout();
-    navigate("/");
-  }
+function titleForPath(pathname: string): string {
+  const match = TITLES.find(([prefix]) => pathname === prefix || pathname.startsWith(prefix));
+  return match?.[1] ?? "Insyx";
+}
+
+type NavbarProps = {
+  onOpenMobileNav: () => void;
+};
+
+export default function Navbar({ onOpenMobileNav }: NavbarProps) {
+  const { pathname } = useLocation();
+  const { user } = useAuth();
+  const title = titleForPath(pathname);
 
   return (
     <header className="topNavbar">
       <div className="topNavbarLeft">
         <button
           type="button"
-          className="topNavbarBack"
-          onClick={() => navigate(-1)}
-          aria-label="Go back"
+          className="topNavbarMenuBtn"
+          aria-label="Open navigation"
+          onClick={onOpenMobileNav}
         >
-          <BsSkipStartFill />
+          <LuMenu aria-hidden="true" />
         </button>
-        <Link to="/explore" className="topNavbarBrand">Insyx Explorer</Link>
+        <h1 className="topNavbarTitle">{title}</h1>
       </div>
-      <div className="topNavbarMeta">Science-of-Science Workspace</div>
       <div className="topNavbarActions">
-        {user ? (
-          <span className="topNavbarUser">
-            {user.email}
-            <button type="button" className="topNavbarLogout" onClick={handleLogout}>
-              Logout
-            </button>
-          </span>
-        ) : (
-          <Link to="/" className="topNavbarLogout">Login</Link>
+        {pathname !== "/search" && (
+          <Link to="/search" className="uiBtn uiBtnPrimary">
+            <LuPlus aria-hidden="true" />
+            <span>New search</span>
+          </Link>
         )}
-        <ThemeToggle />
-        <a
-          className="topNavbarSwagger"
-          href={`${import.meta.env.VITE_API_BASE_URL}/api`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          API
-        </a>
+        {user ? <AvatarMenu /> : <Link to="/" className="topNavbarLogin">Login</Link>}
       </div>
     </header>
   );

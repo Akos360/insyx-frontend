@@ -1,116 +1,69 @@
 .topNavbar {
-  height: 72px;
-  padding: 0 24px;
+  height: 64px;
+  min-height: 64px;
+  padding: 0 20px 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--app-bg-elevated);
-  border-bottom: 1px solid var(--app-border);
-  color: var(--app-text);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  position: relative;
+  z-index: 10;
 }
 
 .topNavbarLeft {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  min-width: 0;
 }
 
-.topNavbarBack {
-  border: none;
-  background: transparent;
-  color: var(--app-text-muted);
-  font-size: 1.4rem;
-  display: inline-flex;
+.topNavbarTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topNavbarMenuBtn {
+  display: none;
+  width: 40px;
+  height: 40px;
   align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-2);
   cursor: pointer;
   padding: 0;
-  transition: color 140ms ease;
+  font-size: 18px;
 }
 
-.topNavbarBack:hover {
-  color: var(--app-text);
-}
-
-.topNavbarBack:focus-visible {
-  outline: none;
-  color: var(--app-accent);
-}
-
-.topNavbarBrand {
-  font-size: 1.2rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--app-accent);
-  text-decoration: none;
-}
-
-.topNavbarMeta {
-  color: var(--app-text-muted);
-  font-size: 0.95rem;
+.topNavbarMenuBtn:hover {
+  background: var(--hover);
+  color: var(--text);
 }
 
 .topNavbarActions {
   display: flex;
   align-items: center;
-  gap: 16px;
-}
-
-.topNavbarSwagger {
-  padding: 6px 14px;
-  border: 1px solid var(--app-border);
-  color: var(--app-text-muted);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: color 0.15s, border-color 0.15s;
-}
-
-.topNavbarSwagger:hover {
-  color: var(--app-accent);
-  border-color: var(--app-accent);
-}
-
-.topNavbarUser {
-  display: inline-flex;
-  align-items: center;
   gap: 10px;
-  font-size: 0.85rem;
-  color: var(--app-text-muted);
-  white-space: nowrap;
 }
 
-.topNavbarLogout {
-  border: none;
-  background: transparent;
-  color: var(--app-accent);
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
+.topNavbarLogin {
+  color: var(--accent-text);
+  font-size: 13.5px;
+  font-weight: 600;
   text-decoration: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.topNavbarLogout:hover {
-  color: var(--app-accent-strong);
-}
-
-@media (max-width: 1024px) {
-  .topNavbar {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
 }
 
 @media (max-width: 768px) {
-  .topNavbar {
-    height: auto;
-    padding: 16px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+  .topNavbarMenuBtn {
+    display: inline-flex;
   }
 }

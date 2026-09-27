@@ -1,43 +1,99 @@
-import { NavLink } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, Link } from "react-router-dom";
+import {
+  LuLayoutGrid,
+  LuSearch,
+  LuUsers,
+  LuShare2,
+  LuChartBar,
+  LuGlobe,
+  LuPanelLeftClose,
+  LuPanelLeftOpen,
+} from "react-icons/lu";
 import "./sidebar.css";
-import { BsGearFill } from "react-icons/bs";
 
-const items = [
-  { to: "/search", label: "Search" },
-  { to: "/authors", label: "Authors" },
-  { to: "/explore-net", label: "Explore Net" },
-  { to: "/graph", label: "Graph" },
-  { to: "/globe", label: "Globe" },
+const exploreItems = [
+  { to: "/search", label: "Search", icon: LuSearch },
+  { to: "/authors", label: "Authors", icon: LuUsers },
+  { to: "/explore-net", label: "Explore Net", icon: LuShare2 },
+  { to: "/graph", label: "Graph", icon: LuChartBar },
+  { to: "/globe", label: "Globe", icon: LuGlobe },
 ];
 
-export default function Sidebar() {
-  return (
-    <aside className="sideNav">
-      <nav className="sideNavLinks" aria-label="Primary">
-        {items.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              isActive ? "sideNavLink sideNavLinkActive" : "sideNavLink"
-            }
-          >
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
+const COLLAPSE_KEY = "sidebar-collapsed";
 
-      <div className="sideNavFooter">
-        <NavLink
-          to="/settings"
-          className={({ isActive }) =>
-            isActive ? "sideNavLink sideNavLinkActive sideNavSettingsLink" : "sideNavLink sideNavSettingsLink"
-          }
-        >
-          <BsGearFill aria-hidden="true" />
-          <span>Settings</span>
-        </NavLink>
-      </div>
-    </aside>
+type SidebarProps = {
+  mobileOpen: boolean;
+  onCloseMobile: () => void;
+};
+
+export default function Sidebar({ mobileOpen, onCloseMobile }: SidebarProps) {
+  const [collapsed, setCollapsed] = useState(() => window.localStorage.getItem(COLLAPSE_KEY) === "true");
+
+  function toggleCollapsed() {
+    setCollapsed((current) => {
+      const next = !current;
+      window.localStorage.setItem(COLLAPSE_KEY, String(next));
+      return next;
+    });
+  }
+
+  return (
+    <>
+      {mobileOpen && <div className="sidebarOverlay" onClick={onCloseMobile} aria-hidden="true" />}
+      <aside
+        aria-label="Primary"
+        className={
+          "sideNav" +
+          (collapsed ? " sideNavCollapsed" : "") +
+          (mobileOpen ? " sideNavMobileOpen" : "")
+        }
+      >
+        <div className="sideNavHeader">
+          <Link to="/explore" className="sideNavBrand" onClick={onCloseMobile}>
+            <span className="sideNavBrandMark" aria-hidden="true">I</span>
+            {!collapsed && <span>Insyx</span>}
+          </Link>
+          <button
+            type="button"
+            className="sideNavCollapseBtn"
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-expanded={!collapsed}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            onClick={toggleCollapsed}
+          >
+            {collapsed ? <LuPanelLeftOpen aria-hidden="true" /> : <LuPanelLeftClose aria-hidden="true" />}
+          </button>
+        </div>
+
+        <nav className="sideNavGroup" aria-label="Overview">
+          <NavLink
+            to="/explore"
+            onClick={onCloseMobile}
+            className={({ isActive }) => "sideNavLink" + (isActive ? " sideNavLinkActive" : "")}
+            title={collapsed ? "Overview" : undefined}
+          >
+            <LuLayoutGrid aria-hidden="true" />
+            {!collapsed && <span>Overview</span>}
+          </NavLink>
+        </nav>
+
+        <nav className="sideNavGroup" aria-label="Explore">
+          {!collapsed && <div className="sideNavLabel">Explore</div>}
+          {exploreItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={onCloseMobile}
+              className={({ isActive }) => "sideNavLink" + (isActive ? " sideNavLinkActive" : "")}
+              title={collapsed ? item.label : undefined}
+            >
+              <item.icon aria-hidden="true" />
+              {!collapsed && <span>{item.label}</span>}
+            </NavLink>
+          ))}
+        </nav>
+      </aside>
+    </>
   );
 }

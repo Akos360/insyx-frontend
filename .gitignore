@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Copied from node_modules/maplibre-gl by scripts/copy-maplibre-worker.mjs (predev/prebuild)
+public/vendor/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -27,3 +30,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Claude Code agent notes — local working context, not part of the project deliverable
+CLAUDE.md
+CLAUDE.local.md

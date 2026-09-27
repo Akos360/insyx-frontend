@@ -3,12 +3,22 @@ import { api } from "./client";
 export type AuthUser = {
   id: string;
   email: string;
+  name: string | null;
+  affiliation: string | null;
+};
+
+export type ProfileUpdate = {
+  name?: string;
+  email?: string;
+  affiliation?: string;
+  currentPassword?: string;
+  newPassword?: string;
 };
 
 export type Credentials = {
   email: string;
   password: string;
-  // Honeypot — always empty for real users, see HomePage's hidden field.
+  // Honeypot; see HomePage's hidden field.
   website?: string;
 };
 
@@ -43,5 +53,10 @@ export async function resetPassword(token: string, newPassword: string): Promise
 
 export async function googleLogin(idToken: string): Promise<AuthUser> {
   const { data } = await api.post<AuthUser>("/auth/google", { idToken });
+  return data;
+}
+
+export async function updateProfile(update: ProfileUpdate): Promise<AuthUser> {
+  const { data } = await api.patch<AuthUser>("/auth/me", update);
   return data;
 }

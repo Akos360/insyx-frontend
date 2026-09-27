@@ -23,7 +23,7 @@ export default function GraphPage() {
     const scatterOpt = buildChartOption('year-vs-citations', data, ct);
     const pie       = buildChartOption('open-access',       data, ct);
 
-    // 3D bar — built from the field×period stats endpoint; echarts-gl renders it
+    // Rendered via the echarts-gl import above.
     const fields = [...new Set(data.fieldPeriod.map((r) => r.field))].slice(0, 6);
     const bar3dData = fields.flatMap((field, yi) =>
       PERIODS.map((_, xi) => {

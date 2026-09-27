@@ -31,6 +31,12 @@
 .maplibregl-ctrl-group button {
   background-color: transparent !important;
   color: var(--app-text) !important;
+  /* .maplibregl-ctrl-group wraps its buttons in its own 1px border (see the
+     override below), on top of each button's own box — so to make the whole
+     group exactly as wide as .globeBtn (36px, border included), the buttons
+     themselves need to be 2px narrower than that. */
+  width: 34px !important;
+  height: 34px !important;
 }
 
 .maplibregl-ctrl-group button:hover {
@@ -41,17 +47,25 @@
   filter: var(--app-icon-filter, none);
 }
 
+/* MapLibre's own icons are baked into their SVG data-URIs at a fixed 29px and
+   don't stretch to fill a bigger button (no background-size set upstream) —
+   they end up looking noticeably smaller/thinner than the custom buttons
+   right below them even though the buttons are now the same 36px box. */
+.maplibregl-ctrl-icon {
+  background-size: 100% 100% !important;
+}
+
 /* Shared styles for custom map buttons (2D/3D toggle, recenter) */
 .globeBtn {
   position: absolute;
   right: 10px;
-  width: 29px;
-  height: 29px;
+  width: 36px;
+  height: 36px;
   background: var(--app-surface-strong);
   border: 1px solid var(--app-border);
-  border-radius: 4px;
+  border-radius: 5px;
   color: var(--app-text);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   cursor: pointer;
@@ -60,22 +74,55 @@
   justify-content: center;
   padding: 0;
   z-index: 2;
+  transition: right 220ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .globeBtn:hover {
   background: var(--app-overlay);
 }
 
-/* Non-compact: NavigationControl sits at default top: 10px (~89px tall).
-   Buttons start immediately below with a small gap. */
-.globeProjectionToggle { top: 110px; }
-.globeResetBtn         { top: 141px; }
-.globeScreenshotBtn    { top: 172px; }
-.globeFullscreenBtn    { top: 203px; }
+.globeBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Non-compact: container top:10 (MapLibre default) + the group's own 10px
+   margin + its 104px height (3 stacked 34px buttons + 2px group border) +
+   a 10px gap = 134. Buttons start there, each 44px apart (36px + 8px gap). */
+.globeProjectionToggle { top: 134px; }
+.globeResetBtn         { top: 178px; }
+.globeScreenshotBtn    { top: 222px; }
+.globeFullscreenBtn    { top: 266px; }
 
 /* Compact: push MapLibre's ctrl group below the 25px expand button in the card corner. */
 .mapGlobeWrapperCompact .maplibregl-ctrl-top-right {
   top: 30px;
 }
-.mapGlobeWrapperCompact .globeProjectionToggle { top: 130px; }
-.mapGlobeWrapperCompact .globeResetBtn         { top: 161px; }
+/* Same 10(margin)+104(group)+10(gap) math as above, offset by the container's top:30. */
+.mapGlobeWrapperCompact .globeProjectionToggle { top: 154px; }
+.mapGlobeWrapperCompact .globeResetBtn         { top: 198px; }
+
+/* The explorer side panel (GlobePanel) overlays the map's right edge when
+   open, hiding these controls underneath it — shift them left by the panel
+   width instead, so they stay visible and usable alongside it.
+   MapLibre's own top-right container adds its own 10px right margin around
+   the nav control (see maplibre-gl.css), so it needs 10px less `right` than
+   .globeBtn for their edges to actually line up. */
+.globeMapAreaPanelOpen .maplibregl-ctrl-top-right {
+  right: 360px;
+  transition: right 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.globeMapAreaPanelOpen .globeBtn {
+  right: 370px;
+  transition: right 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@container (max-width: 1024px) {
+  .globeMapAreaPanelOpen .maplibregl-ctrl-top-right { right: 300px; }
+  .globeMapAreaPanelOpen .globeBtn                  { right: 310px; }
+}
+
+@container (max-width: 640px) {
+  .globeMapAreaPanelOpen .maplibregl-ctrl-top-right { right: 0; }
+  .globeMapAreaPanelOpen .globeBtn                  { right: 10px; }
+}

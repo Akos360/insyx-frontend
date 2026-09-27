@@ -1,10 +1,5 @@
-/**
- * Builds ECharts option objects from server-pre-aggregated lakehouse stats.
- *
- * Each builder takes only the pre-aggregated rows it needs (already grouped
- * and summed by the backend via Trino) — the corpus itself is never fetched
- * or aggregated client-side, so this scales regardless of corpus size.
- */
+// Builds ECharts options from stats pre-aggregated server-side (via Trino) —
+// the corpus is never fetched or aggregated client-side, so this scales regardless of size.
 
 export interface ThemeColors {
   text: string;
@@ -63,10 +58,6 @@ function axisBase(ct: ThemeColors) {
 }
 
 const K = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v));
-
-// ---------------------------------------------------------------------------
-// Individual builders
-// ---------------------------------------------------------------------------
 
 function papersByField(byField: FieldStat[], ct: ThemeColors): object {
   const sorted = [...byField].sort((a, b) => b.paper_count - a.paper_count).slice(0, 12);
@@ -224,10 +215,6 @@ function fieldPeriod(rows: FieldPeriodStat[], ct: ThemeColors): object {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
   };
 }
-
-// ---------------------------------------------------------------------------
-// Public entry point
-// ---------------------------------------------------------------------------
 
 export function buildChartOption(
   chartId: string,

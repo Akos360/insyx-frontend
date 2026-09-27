@@ -16,6 +16,7 @@ function mockAuthValue(overrides: Partial<AuthContextValue>): AuthContextValue {
     logout: vi.fn(),
     loginWithGoogle: vi.fn(),
     resetPassword: vi.fn(),
+    updateProfile: vi.fn(),
     ...overrides,
   };
 }
@@ -49,7 +50,9 @@ describe("RequireAuth", () => {
   });
 
   it("renders the protected route when logged in", () => {
-    vi.mocked(useAuth).mockReturnValue(mockAuthValue({ user: { id: "1", email: "a@b.com" } }));
+    vi.mocked(useAuth).mockReturnValue(
+      mockAuthValue({ user: { id: "1", email: "a@b.com", name: null, affiliation: null } }),
+    );
 
     renderAt("/settings");
     expect(screen.getByText("settings page")).toBeInTheDocument();

@@ -12,83 +12,192 @@
  */
 
 /*
- * Palette, tier 1 (brand anchors — unchanged in spirit, refined in oklch for
- * even lightness/chroma steps). Tier 2 (--app-*, below) is what components
- * actually consume; --app-accent is a deliberate near-constant across both
- * themes (~52% lightness reads clearly against both a near-black and a
- * near-white surface, and still contrasts white text on a filled badge),
- * while --app-accent-strong is the one thing that's genuinely different per
- * theme — a glowing mint in the dark theme, a deep indigo in the light one —
- * each theme's single "signature" moment (CTA button, active states).
+ * Design tokens, ported from the approved redesign
+ * (insyx-design-handoff/tokens.css). Dark is the base :root palette;
+ * [data-theme="light"] overrides it; "system" removes the attribute and
+ * falls back to the prefers-color-scheme block below (see ThemeContext.tsx).
+ *
+ * --app-* names are a compatibility layer over the same tokens, kept so
+ * pages not yet migrated to the redesign keep working unchanged. New or
+ * migrated code should use the plain names (--bg, --panel, --primary, etc.)
+ * directly; once every page is migrated, the --app-* aliases can go.
  */
 :root {
+  --bg: #0B0F14;
+  --surface: #0F141A;
+  --panel: #141A21;
+  --panel-2: #1A212A;
+  --hover: #1E2630;
+  --border: #232B35;
+  --border-strong: #2E3844;
+  --text: #E6EAF0;
+  --text-2: #A7B0BC;
+  --text-3: #808B98;
+  --primary: #2F6FE0;
+  --primary-hover: #3B7BEE;
+  --accent-text: #7FAEFF;
+  --accent-soft: rgba(90, 150, 255, .14);
+  --danger: #F07878;
+  --danger-soft: rgba(240, 120, 120, .12);
+  --edge: #34404D;
+  --c1: #5B9BFF;
+  --c2: #2DB8A6;
+  --c3: #9A8CF7;
+  --c4: #E2A640;
+  --c5: #7B8797;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35);
+  --pop: 0 12px 32px rgba(0, 0, 0, .45);
+  --skel-a: #1A212A;
+  --skel-b: #26303B;
+  --globe: #101720;
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: dark;
+
+  /* --app-* compatibility aliases — see comment above. */
   --shadow-grey: #161925ff;
   --twilight-indigo: #23395bff;
   --rich-cerulean: #406e8eff;
   --powder-blue: #8ea8c3ff;
   --frozen-water: #cbf7edff;
-
-  --app-bg: oklch(15% 0.025 255);
-  --app-bg-elevated: oklch(18% 0.028 255);
-  --app-surface: oklch(21% 0.03 255);
-  --app-surface-soft: oklch(25% 0.032 255);
-  --app-surface-strong: oklch(31% 0.038 255);
-  --app-text: oklch(95% 0.012 255);
-  --app-text-muted: oklch(68% 0.035 250);
-  --app-border: oklch(33% 0.038 255);
-  --app-border-strong: oklch(46% 0.045 250);
-  --app-accent: oklch(58% 0.12 235);
-  --app-accent-strong: oklch(87% 0.11 175);
-  --app-button-bg: var(--app-accent-strong);
-  --app-button-bg-hover: color-mix(in oklab, var(--app-accent-strong), white 15%);
-  --app-button-text: oklch(16% 0.02 255);
-  --app-overlay: oklch(8% 0.02 255 / 58%);
-  --app-input-bg: oklch(12% 0.02 255 / 70%);
-  --app-shadow: oklch(4% 0.02 255 / 40%);
+  --app-bg: var(--bg);
+  --app-bg-elevated: var(--surface);
+  --app-surface: var(--panel);
+  --app-surface-soft: var(--panel-2);
+  --app-surface-strong: var(--hover);
+  --app-text: var(--text);
+  --app-text-muted: var(--text-2);
+  --app-border: var(--border);
+  --app-border-strong: var(--border-strong);
+  --app-accent: var(--primary);
+  --app-accent-strong: var(--accent-text);
+  --app-button-bg: var(--primary);
+  --app-button-bg-hover: var(--primary-hover);
+  --app-button-text: #FFFFFF;
+  --app-overlay: rgba(0, 0, 0, .58);
+  --app-input-bg: var(--panel);
+  --app-shadow: rgba(0, 0, 0, .4);
   --app-icon-filter: invert(1);
-  /* Frosted-glass surfaces (login card, GlobePanel) — a cool, faintly lit tint
-     and a soft highlight border, meant to sit over the animated gradient. */
   --app-glass-tint: oklch(35% 0.03 255 / 38%);
   --app-glass-border: oklch(85% 0.05 195 / 28%);
-
-  color-scheme: dark;
-  accent-color: var(--app-accent-strong);
-  scrollbar-color: var(--app-border-strong) var(--app-bg-elevated);
+  accent-color: var(--primary);
+  scrollbar-color: var(--border-strong) var(--surface);
 }
 
-body[data-theme="light"] {
-  --app-bg: oklch(98.5% 0.006 250);
-  --app-bg-elevated: oklch(100% 0 0);
-  --app-surface: oklch(100% 0 0);
-  --app-surface-soft: oklch(96.5% 0.008 250);
-  --app-surface-strong: oklch(92% 0.016 250);
-  --app-text: oklch(24% 0.03 255);
-  --app-text-muted: oklch(46% 0.035 250);
-  --app-border: oklch(89% 0.014 250);
-  --app-border-strong: oklch(76% 0.028 245);
-  --app-accent: oklch(50% 0.12 235);
-  --app-accent-strong: oklch(36% 0.13 250);
-  --app-button-bg: var(--app-accent-strong);
-  --app-button-bg-hover: color-mix(in oklab, var(--app-accent-strong), black 12%);
-  --app-button-text: oklch(97% 0.01 255);
-  --app-overlay: oklch(60% 0.03 250 / 14%);
-  --app-input-bg: oklch(100% 0 0);
-  --app-shadow: oklch(45% 0.03 250 / 10%);
+:root[data-theme="light"] {
+  --bg: #F5F6F8;
+  --surface: #FFFFFF;
+  --panel: #FFFFFF;
+  --panel-2: #F3F5F8;
+  --hover: #EEF1F5;
+  --border: #E4E8ED;
+  --border-strong: #D3D9E1;
+  --text: #0F1720;
+  --text-2: #4B5563;
+  --text-3: #6B7480;
+  --primary: #2563EB;
+  --primary-hover: #1D55D6;
+  --accent-text: #1D4ED8;
+  --accent-soft: #EAF1FE;
+  --danger: #B42318;
+  --danger-soft: #FDECEA;
+  --edge: #C9D1DB;
+  --c1: #2563EB;
+  --c2: #0F9D8A;
+  --c3: #7C6BE6;
+  --c4: #C98410;
+  --c5: #8A94A3;
+  --shadow: 0 1px 2px rgba(16, 24, 40, .06);
+  --pop: 0 12px 32px rgba(16, 24, 40, .14);
+  --skel-a: #EEF1F5;
+  --skel-b: #E0E5EB;
+  --globe: #F2F5F9;
+  color-scheme: light;
+
+  --app-bg: var(--bg);
+  --app-bg-elevated: var(--surface);
+  --app-surface: var(--panel);
+  --app-surface-soft: var(--panel-2);
+  --app-surface-strong: var(--hover);
+  --app-text: var(--text);
+  --app-text-muted: var(--text-2);
+  --app-border: var(--border);
+  --app-border-strong: var(--border-strong);
+  --app-accent: var(--primary);
+  --app-accent-strong: var(--accent-text);
+  --app-button-bg: var(--primary);
+  --app-button-bg-hover: var(--primary-hover);
+  --app-button-text: #FFFFFF;
+  --app-overlay: rgba(15, 23, 32, .14);
+  --app-input-bg: var(--panel);
+  --app-shadow: rgba(16, 24, 40, .1);
   --app-icon-filter: none;
   --app-glass-tint: oklch(100% 0 0 / 45%);
   --app-glass-border: oklch(100% 0 0 / 60%);
+  accent-color: var(--primary);
+  scrollbar-color: var(--border-strong) var(--panel-2);
+}
 
-  color-scheme: light;
-  accent-color: var(--app-accent-strong);
-  scrollbar-color: var(--app-border-strong) var(--app-surface-soft);
+/* "System" theme: no data-theme attribute set, follow the OS (ThemeContext.tsx) */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --bg: #F5F6F8;
+    --surface: #FFFFFF;
+    --panel: #FFFFFF;
+    --panel-2: #F3F5F8;
+    --hover: #EEF1F5;
+    --border: #E4E8ED;
+    --border-strong: #D3D9E1;
+    --text: #0F1720;
+    --text-2: #4B5563;
+    --text-3: #6B7480;
+    --primary: #2563EB;
+    --primary-hover: #1D55D6;
+    --accent-text: #1D4ED8;
+    --accent-soft: #EAF1FE;
+    --danger: #B42318;
+    --danger-soft: #FDECEA;
+    --edge: #C9D1DB;
+    --c1: #2563EB;
+    --c2: #0F9D8A;
+    --c3: #7C6BE6;
+    --c4: #C98410;
+    --c5: #8A94A3;
+    --shadow: 0 1px 2px rgba(16, 24, 40, .06);
+    --pop: 0 12px 32px rgba(16, 24, 40, .14);
+    --skel-a: #EEF1F5;
+    --skel-b: #E0E5EB;
+    --globe: #F2F5F9;
+    color-scheme: light;
+
+    --app-bg: var(--bg);
+    --app-bg-elevated: var(--surface);
+    --app-surface: var(--panel);
+    --app-surface-soft: var(--panel-2);
+    --app-surface-strong: var(--hover);
+    --app-text: var(--text);
+    --app-text-muted: var(--text-2);
+    --app-border: var(--border);
+    --app-border-strong: var(--border-strong);
+    --app-accent: var(--primary);
+    --app-accent-strong: var(--accent-text);
+    --app-button-bg: var(--primary);
+    --app-button-bg-hover: var(--primary-hover);
+    --app-button-text: #FFFFFF;
+    --app-overlay: rgba(15, 23, 32, .14);
+    --app-input-bg: var(--panel);
+    --app-shadow: rgba(16, 24, 40, .1);
+    --app-icon-filter: none;
+    --app-glass-tint: oklch(100% 0 0 / 45%);
+    --app-glass-border: oklch(100% 0 0 / 60%);
+    accent-color: var(--primary);
+    scrollbar-color: var(--border-strong) var(--panel-2);
+  }
 }
 
 ::selection {
-  /* --app-accent sits at ~50-58% lightness in both themes, so a near-white
-     foreground reads clearly either way — unlike --app-button-text, which is
-     paired specifically with --app-accent-strong's much larger lightness swing. */
-  background: var(--app-accent);
-  color: oklch(97% 0.01 255);
+  background: var(--primary);
+  color: #FFFFFF;
 }
 
 #root {
@@ -102,8 +211,8 @@ body[data-theme="light"] {
 
 body {
   margin: 0;
-  font-family: "Segoe UI", sans-serif;
-  color: var(--app-text);
-  background: var(--app-bg);
+  font-family: var(--font-sans);
+  color: var(--text);
+  background: var(--bg);
   transition: background-color 180ms ease, color 180ms ease;
 }

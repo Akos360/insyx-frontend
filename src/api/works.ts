@@ -19,17 +19,31 @@ export type WorkDetail = {
   title: string;
   abstract: string | null;
   publication_year: number;
+  publication_date: string | null;
+  type: string | null;
+  language: string | null;
   domain: string | null;
   field: string | null;
   subfield: string | null;
   primary_topic: string | null;
   keywords: string | null;
   cited_by_count: number;
+  referenced_works_count: number | null;
   is_oa: boolean;
   oa_url: string | null;
   pdf_url: string | null;
+  license: string | null;
   source_name: string | null;
+  source_type: string | null;
+  num_authors: number | null;
+  apc_usd: number | null;
   authors: string | null;
+};
+
+export type WorkTopic = {
+  topic_id: string;
+  display_name: string;
+  score: number;
 };
 
 export type WorksPage = {
@@ -41,6 +55,7 @@ export type WorksPage = {
 
 export type WorksQuery = {
   search?: string;
+  domain?: string;
   field?: string;
   yearFrom?: number;
   yearTo?: number;
@@ -54,6 +69,21 @@ export type WorksQuery = {
 export async function searchWorks(query: WorksQuery): Promise<WorksPage> {
   const res = await api.get<WorksPage>("/works", { params: query });
   return res.data;
+}
+
+export async function getWorkDomains(): Promise<string[]> {
+  const res = await api.get<string[]>("/works/domains");
+  return res.data;
+}
+
+/** Builds a direct download link for /works/export — a plain navigation, not an axios call. */
+export function buildExportCsvUrl(query: Omit<WorksQuery, "limit" | "offset">): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  }
+  const qs = params.toString();
+  return `${api.defaults.baseURL}/works/export${qs ? `?${qs}` : ""}`;
 }
 
 export async function getWorkFields(): Promise<string[]> {
@@ -78,7 +108,10 @@ export async function getWorkCoAuthors(id: string): Promise<CoAuthor[]> {
   return res.data;
 }
 
-// ── authors ────────────────────────────────────────────────────────────
+export async function getWorkTopics(id: string): Promise<WorkTopic[]> {
+  const res = await api.get<WorkTopic[]>(`/works/${id}/topics`);
+  return res.data;
+}
 
 export type AuthorListItem = {
   author_id: string;
@@ -141,8 +174,6 @@ export function countryFlag(code: string | null): string {
   return [...code.toUpperCase()].map((c) => String.fromCodePoint(c.charCodeAt(0) + offset)).join("");
 }
 
-// ── institutions ───────────────────────────────────────────────────────
-
 export interface InstitutionProperties {
   name: string;
   workCount: number;
@@ -196,8 +227,6 @@ export async function getInstitutionWorks(id: string): Promise<Work[]> {
   const res = await api.get<Work[]>(`/works/institutions/${id}/works`);
   return res.data;
 }
-
-// ── chart stats ────────────────────────────────────────────────────────
 
 export type ChartFilters = {
   yearFrom?: number;

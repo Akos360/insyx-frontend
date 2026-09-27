@@ -8,7 +8,7 @@ import * as authApi from "../api/auth";
 vi.mock("../api/auth");
 
 function Consumer() {
-  const { user, loading, login, register, logout, loginWithGoogle, resetPassword } = useAuth();
+  const { user, loading, login, register, logout, loginWithGoogle, resetPassword, updateProfile } = useAuth();
   return (
     <div>
       <span data-testid="loading">{String(loading)}</span>
@@ -18,6 +18,7 @@ function Consumer() {
       <button onClick={() => logout()}>logout</button>
       <button onClick={() => loginWithGoogle("a-google-id-token")}>google</button>
       <button onClick={() => resetPassword("a-reset-token", "new-password")}>reset</button>
+      <button onClick={() => updateProfile({ name: "New Name" })}>update</button>
     </div>
   );
 }
@@ -28,7 +29,7 @@ describe("AuthContext", () => {
   });
 
   it("starts loading, then hydrates the user from /auth/me on mount", async () => {
-    vi.mocked(authApi.me).mockResolvedValue({ id: "1", email: "person@example.com" });
+    vi.mocked(authApi.me).mockResolvedValue({ id: "1", email: "person@example.com", name: null, affiliation: null });
 
     render(
       <AuthProvider>
@@ -57,7 +58,7 @@ describe("AuthContext", () => {
 
   it("login() sets the user from the response", async () => {
     vi.mocked(authApi.me).mockRejectedValue(new Error("401"));
-    vi.mocked(authApi.login).mockResolvedValue({ id: "2", email: "logged-in@example.com" });
+    vi.mocked(authApi.login).mockResolvedValue({ id: "2", email: "logged-in@example.com", name: null, affiliation: null });
     const user = userEvent.setup();
 
     render(
@@ -73,7 +74,7 @@ describe("AuthContext", () => {
 
   it("register() sets the user from the response", async () => {
     vi.mocked(authApi.me).mockRejectedValue(new Error("401"));
-    vi.mocked(authApi.register).mockResolvedValue({ id: "3", email: "new@example.com" });
+    vi.mocked(authApi.register).mockResolvedValue({ id: "3", email: "new@example.com", name: null, affiliation: null });
     const user = userEvent.setup();
 
     render(
@@ -88,7 +89,7 @@ describe("AuthContext", () => {
   });
 
   it("logout() clears the user", async () => {
-    vi.mocked(authApi.me).mockResolvedValue({ id: "1", email: "person@example.com" });
+    vi.mocked(authApi.me).mockResolvedValue({ id: "1", email: "person@example.com", name: null, affiliation: null });
     vi.mocked(authApi.logout).mockResolvedValue(undefined);
     const user = userEvent.setup();
 
@@ -105,7 +106,7 @@ describe("AuthContext", () => {
 
   it("loginWithGoogle() sets the user from the response", async () => {
     vi.mocked(authApi.me).mockRejectedValue(new Error("401"));
-    vi.mocked(authApi.googleLogin).mockResolvedValue({ id: "4", email: "google-user@example.com" });
+    vi.mocked(authApi.googleLogin).mockResolvedValue({ id: "4", email: "google-user@example.com", name: null, affiliation: null });
     const user = userEvent.setup();
 
     render(
@@ -122,7 +123,7 @@ describe("AuthContext", () => {
 
   it("resetPassword() sets the user from the response", async () => {
     vi.mocked(authApi.me).mockRejectedValue(new Error("401"));
-    vi.mocked(authApi.resetPassword).mockResolvedValue({ id: "5", email: "reset-user@example.com" });
+    vi.mocked(authApi.resetPassword).mockResolvedValue({ id: "5", email: "reset-user@example.com", name: null, affiliation: null });
     const user = userEvent.setup();
 
     render(
@@ -135,5 +136,21 @@ describe("AuthContext", () => {
     await user.click(screen.getByText("reset"));
     await waitFor(() => expect(screen.getByTestId("user")).toHaveTextContent("reset-user@example.com"));
     expect(authApi.resetPassword).toHaveBeenCalledWith("a-reset-token", "new-password");
+  });
+
+  it("updateProfile() sets the user from the response", async () => {
+    vi.mocked(authApi.me).mockResolvedValue({ id: "1", email: "person@example.com", name: null, affiliation: null });
+    vi.mocked(authApi.updateProfile).mockResolvedValue({ id: "1", email: "person@example.com", name: "New Name", affiliation: null });
+    const user = userEvent.setup();
+
+    render(
+      <AuthProvider>
+        <Consumer />
+      </AuthProvider>,
+    );
+    await waitFor(() => expect(screen.getByTestId("loading")).toHaveTextContent("false"));
+
+    await user.click(screen.getByText("update"));
+    await waitFor(() => expect(authApi.updateProfile).toHaveBeenCalledWith({ name: "New Name" }));
   });
 });

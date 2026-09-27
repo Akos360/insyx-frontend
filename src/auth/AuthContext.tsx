@@ -5,9 +5,8 @@ import { AuthContext } from "./auth-context";
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  // True until the initial /auth/me check resolves — the JWT lives in an
-  // httpOnly cookie we can't read directly, so this is the only way to know
-  // whether a session already exists (e.g. after a page refresh).
+  // True until /auth/me resolves — httpOnly cookie can't be read directly, so
+  // this is the only way to know a session already exists.
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,9 +42,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setUser(resetUser);
   }, []);
 
+  const updateProfile = useCallback(async (update: authApi.ProfileUpdate) => {
+    const updatedUser = await authApi.updateProfile(update);
+    setUser(updatedUser);
+  }, []);
+
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, loginWithGoogle, resetPassword }),
-    [user, loading, login, register, logout, loginWithGoogle, resetPassword],
+    () => ({ user, loading, login, register, logout, loginWithGoogle, resetPassword, updateProfile }),
+    [user, loading, login, register, logout, loginWithGoogle, resetPassword, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

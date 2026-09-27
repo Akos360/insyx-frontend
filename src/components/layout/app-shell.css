@@ -21,10 +21,3 @@
      the space actually left after the sidebar, not the raw window width. */
   container-type: inline-size;
 }
-
-
-@media (max-width: 768px) {
-  .appShellBody {
-    flex-direction: column;
-  }
-}

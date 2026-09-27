@@ -20,7 +20,6 @@ export default function SingleChartPage() {
   const meta = CHART_LIST.find(c => c.id === chartId) ?? CHART_LIST[0];
   const idx  = CHART_LIST.indexOf(meta);
 
-  // ── filter state ──────────────────────────────────────────────────────────
   const [yearFrom, setYearFrom] = useState<number | ''>('');
   const [yearTo,   setYearTo]   = useState<number | ''>('');
   const [field,    setField]    = useState('');
@@ -37,7 +36,6 @@ export default function SingleChartPage() {
 
   const filterKey = JSON.stringify(filters);
 
-  // ── data ──────────────────────────────────────────────────────────────────
   const { data: byYear = [], isLoading: l1, isError: e1 } = useQuery({ queryKey: ['stats', 'by-year', filterKey], queryFn: () => getStatsByYear(filters) });
   const { data: byField = [], isLoading: l2, isError: e2 } = useQuery({ queryKey: ['stats', 'by-field', filterKey], queryFn: () => getStatsByField(filters) });
   const { data: scatter = [], isLoading: l3, isError: e3 } = useQuery({ queryKey: ['stats', 'scatter', filterKey], queryFn: () => getStatsScatter(filters) });
@@ -52,23 +50,19 @@ export default function SingleChartPage() {
     [byYear, byField, scatter, oaByYear, fieldPeriod],
   );
 
-  // Total paper count for the current filter set, shown in the footer — derived
-  // from whichever stat is cheapest to sum (by-year covers the whole corpus).
+  // by-year covers the whole corpus and is cheapest to sum for a total count.
   const totalCount = useMemo(() => byYear.reduce((s, r) => s + r.paper_count, 0), [byYear]);
 
-  // ── chart option ──────────────────────────────────────────────────────────
   const option = useMemo(() => {
     const ct = makeThemeColors(theme === 'dark');
     return buildChartOption(chartId, data, ct);
   }, [chartId, data, theme]);
 
-  // ── navigation between charts ─────────────────────────────────────────────
   const prevChart = () => navigate(`/graph/${CHART_LIST[(idx - 1 + CHART_LIST.length) % CHART_LIST.length].id}`);
   const nextChart = () => navigate(`/graph/${CHART_LIST[(idx + 1) % CHART_LIST.length].id}`);
 
   return (
     <div className="scPage">
-      {/* ── top bar ── */}
       <div className="scTopBar">
         <Link to="/graph" className="scBack" title="All charts">
           <BsArrowLeft size={14} /> All Charts
@@ -86,7 +80,6 @@ export default function SingleChartPage() {
       </div>
 
       <div className="scBody">
-        {/* ── chart area ── */}
         <div className="scChartArea">
           {isLoading && <div className="scStatus">Loading data…</div>}
           {isError   && <div className="scStatus scStatusError">Failed to load data.</div>}
@@ -101,7 +94,6 @@ export default function SingleChartPage() {
           <div className="scCount">{totalCount.toLocaleString()} papers</div>
         </div>
 
-        {/* ── filter sidebar ── */}
         <aside className="scFilters">
           <div className="scFilterSection">
             <div className="scFilterLabel">Year range</div>

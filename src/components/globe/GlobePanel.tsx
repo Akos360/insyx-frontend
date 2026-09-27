@@ -14,28 +14,16 @@ import { humanizeAuthors } from "../../utils/authorNames";
 import type { ClickedInstitution } from "./MapGlobe";
 import "./GlobePanel.css";
 
-// ---------------------------------------------------------------------------
-// Navigation stack types
-// ---------------------------------------------------------------------------
-
 type NavEntry =
   | { kind: "home" }
   | { kind: "institution"; inst: ClickedInstitution; works: Work[] | null; loading: boolean }
   | { kind: "work"; workId: string };
-
-// ---------------------------------------------------------------------------
-// Props
-// ---------------------------------------------------------------------------
 
 type GlobePanelProps = {
   isOpen: boolean;
   onClose: () => void;
   clickedInstitution: ClickedInstitution | null;
 };
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 
 export default function GlobePanel({ isOpen, onClose, clickedInstitution }: GlobePanelProps) {
   const [nav, setNav]               = useState<NavEntry[]>([{ kind: "home" }]);
@@ -47,7 +35,6 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
 
   const current = nav[nav.length - 1];
 
-  // When a map point is clicked, navigate to that institution
   useEffect(() => {
     if (!clickedInstitution) return;
     const entry: NavEntry = { kind: "institution", inst: clickedInstitution, works: null, loading: true };
@@ -55,10 +42,6 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
     fetchWorks(clickedInstitution.id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clickedInstitution?.id]);
-
-  // ---------------------------------------------------------------------------
-  // Navigation helpers
-  // ---------------------------------------------------------------------------
 
   function push(entry: NavEntry) {
     setNav((prev) => [...prev, entry]);
@@ -107,10 +90,6 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
     push({ kind: "work", workId: id });
   }
 
-  // ---------------------------------------------------------------------------
-  // Debounced search
-  // ---------------------------------------------------------------------------
-
   function handleQueryChange(q: string) {
     setQuery(q);
     if (searchTimer.current) clearTimeout(searchTimer.current);
@@ -130,16 +109,11 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
         setInstResults(insts);
         setWorkResults(worksPage.items);
       } catch {
-        // silently ignore
       } finally {
         setIsSearching(false);
       }
     }, 350);
   }
-
-  // ---------------------------------------------------------------------------
-  // Derived display state
-  // ---------------------------------------------------------------------------
 
   const showHome        = current.kind === "home" && !query.trim();
   const showResults     = current.kind === "home" && query.trim().length > 0;
@@ -153,13 +127,8 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
     return "Explorer";
   }
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
-
   return (
     <div className={`globePanel${isOpen ? " globePanelOpen" : ""}`}>
-      {/* Header */}
       <div className="globePanelHeader">
         {nav.length > 1 ? (
           <button className="globePanelIconBtn" onClick={back} title="Back">
@@ -174,7 +143,6 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
         </button>
       </div>
 
-      {/* Search bar */}
       <div className="globePanelSearchBar">
         {isSearching
           ? <span className="globePanelSpinner" />
@@ -194,7 +162,6 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
         )}
       </div>
 
-      {/* Scrollable content */}
       <div className="globePanelBody">
         {showHome && <HomeView />}
         {showResults && (
@@ -220,10 +187,6 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
     </div>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Sub-views
-// ---------------------------------------------------------------------------
 
 function HomeView() {
   return (
@@ -306,7 +269,6 @@ function InstitutionView({
 }) {
   return (
     <div>
-      {/* Stats row */}
       <div className="globePanelStats">
         <div className="globePanelStat">
           <span className="globePanelStatVal">{inst.workCount}</span>
@@ -324,7 +286,6 @@ function InstitutionView({
         )}
       </div>
 
-      {/* Works list */}
       <section className="globePanelSection">
         <h4 className="globePanelSectionTitle">Papers</h4>
         {loading && <p className="globePanelEmptyText">Loading…</p>}

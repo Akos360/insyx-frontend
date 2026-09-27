@@ -28,7 +28,6 @@ export default function AuthorPage() {
     return { totalCitations, years, fields };
   }, [papers]);
 
-  // ── charts ───────────────────────────────────────────────────────────────
   const { citationsChart, papersYearChart } = useMemo(() => {
     const ct = makeThemeColors(theme === 'dark');
     const ax = {
@@ -38,7 +37,7 @@ export default function AuthorPage() {
       axisTick:  { show: false },
     };
 
-    // Citations per paper (horizontal bar — easiest to read author impact)
+    // Horizontal bar: easiest to read author impact.
     const sorted = [...papers]
       .sort((a, b) => (b.cited_by_count ?? 0) - (a.cited_by_count ?? 0))
       .slice(0, 10);
@@ -65,7 +64,6 @@ export default function AuthorPage() {
       }],
     };
 
-    // Papers by year
     const yearCounts: Record<number, number> = {};
     for (const p of papers) {
       if (p.publication_year) yearCounts[p.publication_year] = (yearCounts[p.publication_year] ?? 0) + 1;
@@ -89,7 +87,6 @@ export default function AuthorPage() {
     return { citationsChart, papersYearChart };
   }, [papers, theme]);
 
-  // ── render ────────────────────────────────────────────────────────────────
   if (isLoading) return <div className="authorPage"><div className="authorStatus">Loading…</div></div>;
   if (isError || !profile) return (
     <div className="authorPage">
@@ -102,10 +99,8 @@ export default function AuthorPage() {
 
   return (
     <div className="authorPage">
-      {/* ── back ── */}
       <Link to="/authors" className="authorBack"><BsArrowLeft size={13} /> All Authors</Link>
 
-      {/* ── profile header ── */}
       <div className="authorHeader">
         <div className="authorHeaderMain">
           {flag && <span className="authorFlag">{flag}</span>}
@@ -134,7 +129,6 @@ export default function AuthorPage() {
         )}
       </div>
 
-      {/* ── stats strip ── */}
       <div className="authorStats">
         <div className="authorStat">
           <span className="authorStatValue">{papers.length}</span>
@@ -156,7 +150,6 @@ export default function AuthorPage() {
         )}
       </div>
 
-      {/* ── fields ── */}
       {stats.fields.length > 0 && (
         <div className="authorFieldRow">
           {stats.fields.map(f => <span key={f} className="authorFieldTag">{f}</span>)}
@@ -164,7 +157,6 @@ export default function AuthorPage() {
       )}
 
       <div className="authorBody">
-        {/* ── papers list ── */}
         <div className="authorSection authorPapers">
           <div className="authorSectionTitle">Works ({papers.length})</div>
           <div className="authorPaperList">
@@ -189,7 +181,6 @@ export default function AuthorPage() {
           </div>
         </div>
 
-        {/* ── charts ── */}
         {papers.length > 1 && (
           <div className="authorCharts">
             <div className="authorChartBlock">

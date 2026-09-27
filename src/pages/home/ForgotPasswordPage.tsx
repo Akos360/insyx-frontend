@@ -9,7 +9,7 @@ const HeroGradient = lazy(() => import("./HeroGradient"));
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [website, setWebsite] = useState(""); // honeypot — real users never fill this
+  const [website, setWebsite] = useState(""); // honeypot
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,11 +20,7 @@ export default function ForgotPasswordPage() {
     setSubmitting(true);
     try {
       await forgotPassword(email, website);
-      // The backend itself returns this identical response whether or not
-      // the email is registered — no enumeration happens here. This only
-      // shows the confirmation for an actual successful request; a real
-      // failure (network error, rate limit, 500) surfaces as an error
-      // instead of a false "sent" message.
+      // Backend returns the same response whether or not the email is registered (no enumeration).
       setSubmitted(true);
     } catch (err) {
       const message =

@@ -6,9 +6,7 @@ import {
 import type { ChartStatsData } from './buildChartOption';
 
 export interface UseWorksStatsOptions {
-  /** Passed straight to each underlying useQuery — set for previews so they
-   *  don't refetch on every mount (React Query dedupes by query key regardless,
-   *  this only controls whether a mount past staleTime triggers a refetch). */
+  /** For previews: avoids refetch on every mount (React Query already dedupes by key regardless). */
   staleTime?: number;
 }
 
@@ -18,11 +16,7 @@ export interface UseWorksStatsResult {
   isError: boolean;
 }
 
-/**
- * Fetches the 5 pre-aggregated stats series charts are built from. Shared by
- * GraphPage and GraphPreview — same query keys, so React Query deduplicates
- * the actual network requests between them regardless of which mounts first.
- */
+/** Fetches the 5 pre-aggregated stats series; shared by GraphPage and GraphPreview so React Query dedupes requests between them. */
 export function useWorksStats(options: UseWorksStatsOptions = {}): UseWorksStatsResult {
   const { staleTime } = options;
 

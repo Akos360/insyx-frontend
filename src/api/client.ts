@@ -2,19 +2,14 @@ import axios from "axios";
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  // The JWT lives in an httpOnly cookie the backend sets — the browser needs
-  // to actually send/receive it cross-origin (backend CORS already allows it).
+  // httpOnly JWT cookie needs this to be sent/received cross-origin.
   withCredentials: true,
 });
 
-// Endpoints where a 401 can't be fixed by refreshing (either the refresh
-// attempt itself failed, or there's no session to refresh yet).
+// These endpoints' 401s can't be fixed by refreshing (refresh itself failed, or no session yet).
 const NO_REFRESH_RETRY = ["/auth/refresh", "/auth/login", "/auth/register"];
 
-// Access tokens are short-lived (15m); rather than logging the user out the
-// moment one expires, try one silent refresh and replay the original
-// request. Concurrent 401s share a single in-flight refresh instead of each
-// triggering their own.
+// Silent-refresh-and-retry on 401 instead of logging out; concurrent 401s share one in-flight refresh.
 let refreshPromise: Promise<void> | null = null;
 
 api.interceptors.response.use(

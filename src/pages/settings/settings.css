@@ -1,114 +1,47 @@
 .settingsPage {
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 64px);
   padding: 28px;
-}
-
-.settingsCard {
   display: flex;
   flex-direction: column;
+  gap: 20px;
+  max-width: 640px;
 }
 
 .settingsHeader {
-  margin-bottom: 24px;
+  margin-bottom: 4px;
 }
 
 .settingsEyebrow {
-  margin: 0 0 10px;
-  color: var(--app-text-muted);
-  font-size: 0.85rem;
+  margin: 0 0 8px;
+  color: var(--text-3);
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .settingsTitle {
   margin: 0;
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  color: var(--text);
 }
 
-.settingsForm {
+.settingsSection {
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  width: 280px;
+  gap: 12px;
 }
 
-.settingsField {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.settingsSectionDesc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-3);
 }
 
-.settingsFieldLabel {
-  color: var(--app-text-muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.settingsInput {
-  height: 36px;
-  padding: 0 10px;
-  border: 1px solid var(--app-border);
-  background: var(--app-input-bg);
-  color: var(--app-text);
-  font: inherit;
-  font-size: 0.9rem;
-}
-
-.settingsInput:focus {
-  outline: 2px solid var(--app-accent);
-  outline-offset: 2px;
-}
-
-.settingsFooter {
-  margin-top: 24px;
-  display: flex;
-  gap: 10px;
-  justify-content: flex-start;
-}
-
-.settingsSaveButton {
-  padding: 8px 18px;
-  border: 1px solid var(--app-accent);
-  background: transparent;
-  color: var(--app-accent);
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
-}
-
-.settingsSaveButton:hover {
-  background: var(--app-accent);
-  color: var(--app-bg);
-}
-
-.settingsLogoutButton {
-  padding: 8px 18px;
-  border: 1px solid var(--app-border);
-  background: transparent;
-  color: var(--app-text-muted);
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
-}
-
-.settingsLogoutButton:hover {
-  color: var(--app-text);
-  border-color: var(--app-border-strong);
-}
-
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .settingsPage {
     padding: 16px;
-  }
-
-  .settingsForm {
-    width: 100%;
   }
 }

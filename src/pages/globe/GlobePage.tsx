@@ -20,7 +20,7 @@ export default function GlobePage() {
 
   return (
     <div className="globePage">
-      <div className="globeMapArea">
+      <div className={`globeMapArea${isPanelOpen ? " globeMapAreaPanelOpen" : ""}`}>
         <Suspense fallback={<div className="globePageFallback" />}>
           <MapGlobe onInstitutionClick={handleInstitutionClick} />
         </Suspense>
