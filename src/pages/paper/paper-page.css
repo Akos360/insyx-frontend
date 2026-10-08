@@ -16,29 +16,6 @@
   color: var(--text-3);
 }
 
-.paperBackLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  align-self: flex-start;
-  background: transparent;
-  border: none;
-  color: var(--text-2);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-}
-
-.paperBackLink:hover {
-  color: var(--text);
-}
-
-.paperBackLink svg {
-  width: 16px;
-  height: 16px;
-}
-
 .paperHeader {
   display: flex;
   flex-direction: column;
@@ -49,6 +26,31 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.paperCardHeadActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Institution names can be much longer than short field/type tags — let them
+   wrap onto multiple lines within the card instead of overflowing it. */
+.paperInstitutionTag {
+  max-width: 100%;
+  height: auto;
+  min-height: 24px;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.paperInstitutionTag:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 
 .paperTitle {
@@ -175,6 +177,7 @@
   text-decoration: none;
   font-weight: 500;
   font-size: 13.5px;
+  flex-shrink: 0;
 }
 
 .paperAuthorName:hover {
@@ -187,9 +190,27 @@
   gap: 8px;
   font-size: 12.5px;
   color: var(--text-3);
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  justify-content: flex-end;
+}
+
+/* The flag is a fixed-width glyph — never shrink it. */
+.paperAuthorMeta > span:first-child {
+  flex-shrink: 0;
+}
+
+/* text-overflow/ellipsis only works on a single text node, not across flex
+   children — this has to live on the institution-name span itself, not the
+   flex row, or the whole line overflows and (with justify-content: flex-end
+   above) only its tail end stays visible instead of a clean "name…" truncation. */
+.paperAuthorInstitution {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+  flex: 0 1 auto;
 }
 
 .paperKvList {

@@ -13,7 +13,16 @@ export type Work = {
   source_name: string;
 };
 
+export type WorkInstitution = {
+  id: string;
+  name: string;
+  country_code: string | null;
+  latitude: number | null;
+  longitude: number | null;
+};
+
 export type WorkDetail = {
+  institutions: WorkInstitution[];
   id: string;
   doi: string | null;
   title: string;
@@ -177,7 +186,10 @@ export function countryFlag(code: string | null): string {
 export interface InstitutionProperties {
   name: string;
   workCount: number;
+  authorCount: number;
   citationCount: number;
+  /** Citations per work — the color encoding (standard bibliometric impact measure) */
+  citationsPerWork: number;
   /** Normalized score 0–1 relative to the top institution in the current dataset */
   score: number;
   countryCode: string;
@@ -188,6 +200,8 @@ export interface InstitutionSummary {
   name: string;
   countryCode: string;
   workCount: number;
+  /** Only present from listInstitutions (/works/institutions), not the flat search endpoint. */
+  authorCount?: number;
   citationCount: number;
 }
 
@@ -225,6 +239,68 @@ export async function searchInstitutions(q: string): Promise<InstitutionSummary[
 
 export async function getInstitutionWorks(id: string): Promise<Work[]> {
   const res = await api.get<Work[]>(`/works/institutions/${id}/works`);
+  return res.data;
+}
+
+export type CountryWorkCount = {
+  countryCode: string;
+  workCount: number;
+};
+
+export async function getInstitutionsByCountry(): Promise<CountryWorkCount[]> {
+  const res = await api.get<CountryWorkCount[]>("/works/institutions/by-country");
+  return res.data;
+}
+
+export type InstitutionsPage = {
+  items: InstitutionSummary[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+export type InstitutionsQuery = {
+  search?: string;
+  limit?: number;
+  offset?: number;
+  sortBy?: "name" | "worksCount" | "citedByCount";
+  sortDir?: "asc" | "desc";
+};
+
+export async function listInstitutions(query: InstitutionsQuery): Promise<InstitutionsPage> {
+  const res = await api.get<InstitutionsPage>("/works/institutions", { params: query });
+  return res.data;
+}
+
+export type InstitutionDetail = {
+  id: string;
+  name: string;
+  countryCode: string | null;
+  institutionType: string | null;
+  homepageUrl: string | null;
+  ror: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  workCount: number;
+  citationCount: number;
+};
+
+export async function getInstitution(id: string): Promise<InstitutionDetail | null> {
+  const res = await api.get<InstitutionDetail | null>(`/works/institutions/${id}`);
+  return res.data;
+}
+
+export type InstitutionAuthor = {
+  author_id: string;
+  display_name: string;
+  orcid: string | null;
+  country_code: string | null;
+  works_count: number;
+  cited_by_count: number;
+};
+
+export async function getInstitutionAuthors(id: string): Promise<InstitutionAuthor[]> {
+  const res = await api.get<InstitutionAuthor[]>(`/works/institutions/${id}/authors`);
   return res.data;
 }
 

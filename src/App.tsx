@@ -16,6 +16,8 @@ import SettingsPage from "./pages/settings/SettingsPage";
 import AccountPage from "./pages/account/AccountPage";
 import AuthorsPage from "./pages/authors/AuthorsPage";
 import AuthorPage from "./pages/authors/AuthorPage";
+import InstitutionsPage from "./pages/institutions/InstitutionsPage";
+import InstitutionPage from "./pages/institutions/InstitutionPage";
 import { ThemeProvider } from "./theme/ThemeContext";
 import { AuthProvider } from "./auth/AuthContext";
 import RequireAuth from "./components/auth/RequireAuth";
@@ -38,6 +40,8 @@ export default function App() {
               <Route path="/paper/:id" element={<PaperPage />} />
               <Route path="/authors" element={<AuthorsPage />} />
               <Route path="/author/:authorId" element={<AuthorPage />} />
+              <Route path="/institutions" element={<InstitutionsPage />} />
+              <Route path="/institution/:institutionId" element={<InstitutionPage />} />
               <Route element={<RequireAuth />}>
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/account" element={<AccountPage />} />

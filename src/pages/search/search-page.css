@@ -287,6 +287,34 @@
   white-space: nowrap;
 }
 
+/* Half-screen/tablet tier: the full 6-column table (checkbox, Title, Year,
+   Field, Citations, OA) no longer fits without horizontal scroll — drop the
+   two least-critical columns (Field, OA) rather than force a scrollbar,
+   matching the reduced Title/Year/Citations set the Overview search preview
+   already uses at an even smaller scale. @container (not @media): this needs
+   to react to the space actually left after the sidebar, not the raw window
+   width — see app-shell.css. */
+@container (max-width: 1024px) {
+  .searchColCompact {
+    display: none;
+  }
+
+  .searchTable {
+    min-width: 0;
+  }
+
+  /* .searchRowSub's fixed max-width: 420px (below) is sized for desktop and
+     doesn't shrink with the container — it was still forcing the Title
+     column wide even with the columns above hidden. Let it wrap instead. */
+  .searchRowSub {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    max-width: none;
+    word-break: break-word;
+  }
+}
+
 @media (max-width: 640px) {
   .searchPage {
     padding: 12px;

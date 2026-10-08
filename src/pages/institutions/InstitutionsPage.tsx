@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { searchAuthors, countryFlag, type AuthorListItem } from '../../api/works';
-import { humanizeAuthors } from '../../utils/authorNames';
-import './author-page.css';
+import { listInstitutions, countryFlag, type InstitutionSummary } from '../../api/works';
+import '../authors/author-page.css';
 
-type SortKey = 'displayName' | 'worksCount' | 'citedByCount';
+type SortKey = 'name' | 'worksCount' | 'citedByCount';
 
 const PAGE_SIZE = 50;
 
-export default function AuthorsPage() {
-  const [items, setItems] = useState<AuthorListItem[]>([]);
+export default function InstitutionsPage() {
+  const [items, setItems] = useState<InstitutionSummary[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
 
@@ -29,9 +28,9 @@ export default function AuthorsPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    searchAuthors({ search: debouncedQuery || undefined, sortBy, sortDir: 'desc', limit: PAGE_SIZE, offset })
+    listInstitutions({ search: debouncedQuery || undefined, sortBy, sortDir: 'desc', limit: PAGE_SIZE, offset })
       .then((page) => { setItems(page.items); setTotal(page.total); })
-      .catch(() => setError('Failed to load authors.'))
+      .catch(() => setError('Failed to load institutions.'))
       .finally(() => setLoading(false));
   }, [debouncedQuery, sortBy, offset]);
 
@@ -41,7 +40,7 @@ export default function AuthorsPage() {
   return (
     <div className="authorsRoot">
       <div className="authorsTopBar">
-        <h2 className="authorsTitle">Authors <span className="authorsCount">{total.toLocaleString()}</span></h2>
+        <h2 className="authorsTitle">Institutions <span className="authorsCount">{total.toLocaleString()}</span></h2>
         <div className="authorsControls">
           <input
             className="authorsSearch"
@@ -55,33 +54,30 @@ export default function AuthorsPage() {
             value={sortBy}
             onChange={e => setSortBy(e.target.value as SortKey)}
           >
-            <option value="worksCount">Sort: Papers</option>
+            <option value="worksCount">Sort: Works</option>
             <option value="citedByCount">Sort: Citations</option>
-            <option value="displayName">Sort: Name</option>
+            <option value="name">Sort: Name</option>
           </select>
         </div>
       </div>
 
-      {loading && <div className="authorsStatus">Loading authors…</div>}
+      {loading && <div className="authorsStatus">Loading institutions…</div>}
       {error   && <div className="authorsStatus authorsStatusError">{error}</div>}
 
       {!loading && !error && (
         <>
           <div className="authorsList">
-            {items.length === 0 && <div className="authorsStatus">No authors match your search.</div>}
-            {items.map(a => (
-              <Link key={a.author_id} to={`/author/${a.author_id}`} className="authorsCard">
-                <span className="authorsFlag">{countryFlag(a.country_code)}</span>
+            {items.length === 0 && <div className="authorsStatus">No institutions match your search.</div>}
+            {items.map(i => (
+              <Link key={i.id} to={`/institution/${i.id}`} className="authorsCard">
+                <span className="authorsFlag">{countryFlag(i.countryCode)}</span>
                 <div className="authorsCardBody">
-                  <span className="authorsName">{humanizeAuthors(a.display_name) || a.author_id}</span>
+                  <span className="authorsName">{i.name}</span>
                 </div>
                 <div className="authorsCardMeta">
-                  <span className="authorsPaperBadge">{a.works_count} {a.works_count === 1 ? 'paper' : 'papers'}</span>
-                  <span
-                    className={`authorsOrcidDot${a.orcid ? '' : ' authorsOrcidDotHidden'}`}
-                    title={a.orcid ? 'Has ORCID' : undefined}
-                  >
-                    ID
+                  <span className="authorsPaperBadge">{i.workCount} {i.workCount === 1 ? 'work' : 'works'}</span>
+                  <span className="authorsPaperBadge">
+                    {i.authorCount ?? 0} {i.authorCount === 1 ? 'author' : 'authors'}
                   </span>
                 </div>
               </Link>

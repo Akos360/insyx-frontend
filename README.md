@@ -12,7 +12,8 @@ React SPA for Insyx — a Science-of-Science Explorer. Allows browsing, searchin
 - `Axios` — HTTP client
 - `ECharts` (`echarts-for-react`) — 2D interactive charts
 - `echarts-gl` — 3D charts (bar3D, surface3D, scatter3D)
-- `MapLibre GL JS` — vector tile globe with full zoom quality
+- `MapLibre GL JS` — vector tile globe with full zoom quality; 3D institution bars (fill-extrusion) and a 2D country choropleth
+- `world-atlas` + `topojson-client` — low-res country boundary geometry for the 2D choropleth; `i18n-iso-countries` bridges its numeric country IDs to our alpha-2 `country_code`
 - `@shadergradient/react` + `@react-three/fiber` + `three` — animated 3D gradient backdrop on the landing/auth pages (lazy-loaded, only on those pages)
 - `liquid-glass-react` — frosted-glass login/register card effect (login/register page only)
 - `React Icons` (`react-icons/lu`, Lucide set) — icon library for the redesigned app shell/pages
@@ -58,17 +59,30 @@ cp .env.example .env
 | `/reset-password` | `ResetPasswordPage` | Set a new password from a reset link (`?token=`) |
 | `/explore` | `ExplorePage` | Overview cards for all modules |
 | `/search` | `SearchPage` | Paper search: query/field/sort toolbar, domain/year/OA filters, CSV export, sortable table |
-| `/paper/:id` | `PaperPage` | Single paper detail (type/domain/field tags, stats, topics, authors, institutions) |
-| `/authors` | `AuthorsPage` | Author list with paper counts |
-| `/author/:authorId` | `AuthorPage` | Single author detail with publication list |
+| `/paper/:id` | `PaperPage` | Single paper detail (type/domain/field tags, stats, topics, sortable authors, institutions) |
+| `/authors` | `AuthorsPage` | Author list, searchable/sortable (papers/citations/name) |
+| `/author/:authorId` | `AuthorPage` | Single author detail with sortable publication list (year/citations/title) |
+| `/institutions` | `InstitutionsPage` | Institution list, searchable/sortable (works/citations/name) |
+| `/institution/:institutionId` | `InstitutionPage` | Single institution detail — separate sortable Works and Authors lists |
 | `/graph` | `GraphPage` | Chart gallery overview |
 | `/graph/:chartId` | `SingleChartPage` | Full-screen individual chart |
-| `/globe` | `GlobePage` | Zoomable vector globe (institution markers currently disabled, see note below) |
+| `/globe` | `GlobePage` | Zoomable vector globe — see note below |
 | `/explore-net` | `ExploreNetPage` | Citation network graph |
 | `/settings` | `SettingsPage` | Appearance/theme only (requires login) |
 | `/account` | `AccountPage` | Personal details, password, sessions (requires login) |
 
-> **Globe institution markers:** temporarily disabled (`MapGlobe.tsx` no longer fetches/renders `/works/institutions/map`) — the base globe/map itself works; only the per-institution overlay is off pending a bbox-validation fix on the backend query. maplibre-gl's tile worker also needed two build-time fixes to load at all under Vite/nginx — see `scripts/copy-maplibre-worker.mjs` and the `.mjs` MIME-type block in `nginx.conf`.
+> **Globe (`MapGlobe.tsx`)**: 3D mode renders each institution as a fill-extrusion
+> bar at its lat/lng — footprint size from author count, height from works count,
+> color from citations-per-work (log-scaled on all three; institutions without
+> coordinates yet are simply not plotted). 2D mode instead shows a country
+> choropleth colored by total work count (`/works/institutions/by-country`,
+> joined to `world-atlas`'s country polygons via their numeric id). Zoom-based
+> LOD (`/works/institutions/map`) limits markers to the biggest ones at low
+> zoom, revealing smaller institutions as you zoom in. Clicking a bar opens the
+> right-hand explorer panel (`GlobePanel.tsx`) with that institution's works and
+> authors, each navigable. maplibre-gl's tile worker also needed two build-time
+> fixes to load at all under Vite/nginx — see `scripts/copy-maplibre-worker.mjs`
+> and the `.mjs` MIME-type block in `nginx.conf`.
 
 ## Project Structure
 
@@ -89,6 +103,7 @@ insyx-frontend/
 │   │   ├── buildChartOption.ts   # ECharts option builders
 │   │   └── useWorksStats.ts      # Shared stats-fetching hook (GraphPage + GraphPreview)
 │   ├── components/
+│   │   ├── common/                # BackLink — shared "← back to X" link, Link-to-route or history-back
 │   │   ├── layout/               # AppShell, Navbar, Sidebar (collapsible), AvatarMenu, ThemeToggle
 │   │   ├── auth/                 # RequireAuth route guard, GoogleSignInButton
 │   │   ├── globe/                # MapGlobe, GlobePanel (MapLibre GL)
@@ -101,6 +116,7 @@ insyx-frontend/
 │   │   ├── search/                 # SearchPage
 │   │   ├── paper/                  # PaperPage
 │   │   ├── authors/                # AuthorsPage, AuthorPage
+│   │   ├── institutions/            # InstitutionsPage, InstitutionPage
 │   │   ├── charts/                 # GraphPage, SingleChartPage
 │   │   ├── globe/                  # GlobePage
 │   │   ├── network/                # ExploreNetPage

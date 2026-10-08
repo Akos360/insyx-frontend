@@ -1,8 +1,9 @@
 import ReactECharts from 'echarts-for-react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { BsArrowLeft, BsBoxArrowUpRight } from 'react-icons/bs';
+import { BsBoxArrowUpRight } from 'react-icons/bs';
+import BackLink from '../../components/common/BackLink';
 import { getAuthor, countryFlag } from '../../api/works';
 import { humanizeAuthors } from '../../utils/authorNames';
 import { makeThemeColors } from '../../charts/buildChartOption';
@@ -20,6 +21,15 @@ export default function AuthorPage() {
   });
 
   const papers = profile?.papers ?? [];
+
+  const [papersSort, setPapersSort] = useState<'year' | 'citations' | 'title'>('year');
+  const sortedPapers = useMemo(() => {
+    const sorted = [...papers];
+    if (papersSort === 'year') sorted.sort((a, b) => (b.publication_year ?? 0) - (a.publication_year ?? 0));
+    else if (papersSort === 'citations') sorted.sort((a, b) => (b.cited_by_count ?? 0) - (a.cited_by_count ?? 0));
+    else sorted.sort((a, b) => (a.title ?? '').localeCompare(b.title ?? ''));
+    return sorted;
+  }, [papers, papersSort]);
 
   const stats = useMemo(() => {
     const totalCitations = papers.reduce((s, p) => s + (p.cited_by_count ?? 0), 0);
@@ -99,7 +109,7 @@ export default function AuthorPage() {
 
   return (
     <div className="authorPage">
-      <Link to="/authors" className="authorBack"><BsArrowLeft size={13} /> All Authors</Link>
+      <BackLink to="/authors" label="All Authors" />
 
       <div className="authorHeader">
         <div className="authorHeaderMain">
@@ -158,9 +168,22 @@ export default function AuthorPage() {
 
       <div className="authorBody">
         <div className="authorSection authorPapers">
-          <div className="authorSectionTitle">Works ({papers.length})</div>
+          <div className="authorSectionHead">
+            <div className="authorSectionTitle">Works ({papers.length})</div>
+            {papers.length > 1 && (
+              <select
+                className="authorsSort"
+                value={papersSort}
+                onChange={(e) => setPapersSort(e.target.value as typeof papersSort)}
+              >
+                <option value="year">Sort: Year</option>
+                <option value="citations">Sort: Citations</option>
+                <option value="title">Sort: Title</option>
+              </select>
+            )}
+          </div>
           <div className="authorPaperList">
-            {papers.map(p => (
+            {sortedPapers.map(p => (
               <Link key={p.id} to={`/paper/${p.id}`} className="authorPaperItem">
                 <div className="authorPaperMeta">
                   <span className="authorPaperYear">{p.publication_year}</span>

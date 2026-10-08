@@ -56,9 +56,9 @@ function SearchSkeletonRows() {
             <div className="uiSkel" style={{ height: 11, width: `${30 + (i % 4) * 8}%` }} />
           </td>
           <td className="searchTd searchTdNum"><div className="uiSkel" style={{ height: 12, width: 32, marginLeft: "auto" }} /></td>
-          <td className="searchTd"><div className="uiSkel" style={{ height: 20, width: 90, borderRadius: 999 }} /></td>
+          <td className="searchTd searchColCompact"><div className="uiSkel" style={{ height: 20, width: 90, borderRadius: 999 }} /></td>
           <td className="searchTd searchTdNum"><div className="uiSkel" style={{ height: 12, width: 40, marginLeft: "auto" }} /></td>
-          <td className="searchTd searchTdNum"><div className="uiSkel" style={{ height: 20, width: 24, marginLeft: "auto", borderRadius: 999 }} /></td>
+          <td className="searchTd searchTdNum searchColCompact"><div className="uiSkel" style={{ height: 20, width: 24, marginLeft: "auto", borderRadius: 999 }} /></td>
         </tr>
       ))}
     </>
@@ -391,14 +391,14 @@ export default function SearchPage() {
                   {cols.map((col) => (
                     <th
                       key={col.key}
-                      className={`searchTh${col.num ? " searchThNum" : ""}${col.key === "title" ? " searchThTitle" : ""}`}
+                      className={`searchTh${col.num ? " searchThNum" : ""}${col.key === "title" ? " searchThTitle" : ""}${col.key === "field" ? " searchColCompact" : ""}`}
                       onClick={() => handleSort(col.key)}
                     >
                       {col.label}
                       <SortIcon active={sortKey === col.key} dir={sortDir} />
                     </th>
                   ))}
-                  <th className="searchTh searchThNum">OA</th>
+                  <th className="searchTh searchThNum searchColCompact">OA</th>
                 </tr>
               </thead>
               <tbody>
@@ -419,7 +419,7 @@ export default function SearchPage() {
                         <div className="searchRowSub">{humanizeAuthors(w.authors) || "—"}</div>
                       </td>
                       <td className="searchTd searchTdNum mono">{w.publication_year}</td>
-                      <td className="searchTd">
+                      <td className="searchTd searchColCompact">
                         {w.field ? (
                           <span className="uiTag">
                             <span className="uiTagDot" style={{ background: fieldColorVar(w.field) }} />
@@ -428,7 +428,7 @@ export default function SearchPage() {
                         ) : "—"}
                       </td>
                       <td className="searchTd searchTdNum mono">{w.cited_by_count?.toLocaleString()}</td>
-                      <td className="searchTd searchTdNum">
+                      <td className="searchTd searchTdNum searchColCompact">
                         {w.is_oa
                           ? <span className="uiTag uiTagAccent">Open</span>
                           : <span className="uiTag uiTagMuted">—</span>}

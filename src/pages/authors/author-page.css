@@ -146,6 +146,13 @@
   letter-spacing: 0.03em;
 }
 
+/* Always rendered (even without an ORCID) so it keeps reserving its layout
+   slot — otherwise the paper-count badge next to it shifts right on cards
+   that don't have one, since .authorsCardMeta would just be narrower overall. */
+.authorsOrcidDotHidden {
+  visibility: hidden;
+}
+
 /* ── Single author page ──────────────────────────────────────────────────── */
 
 .authorPage {
@@ -162,18 +169,6 @@
   font-size: 0.85rem;
   padding: 24px 0;
 }
-
-.authorBack {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.78rem;
-  color: var(--app-text-muted);
-  text-decoration: none;
-  transition: color 120ms ease;
-  margin-bottom: 4px;
-}
-.authorBack:hover { color: var(--app-text); }
 
 /* header */
 .authorHeader {
@@ -295,6 +290,13 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--app-text-muted);
+}
+
+.authorSectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 /* institutions */

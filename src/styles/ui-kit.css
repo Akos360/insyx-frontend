@@ -307,3 +307,32 @@
     animation-duration: 4s;
   }
 }
+
+/* Shared "← back to X" link/button — see components/common/BackLink.tsx.
+   Used for both a fixed destination (<Link>) and browser-history-back (<button>). */
+.uiBackLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 120ms ease;
+}
+
+.uiBackLink:hover {
+  color: var(--text);
+}
+
+.uiBackLink svg {
+  width: 16px;
+  height: 16px;
+}

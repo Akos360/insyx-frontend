@@ -1,13 +1,17 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { IoClose, IoChevronBack, IoSearch } from "react-icons/io5";
-import { BsBuilding, BsFileText, BsGlobe } from "react-icons/bs";
+import { BsBuilding, BsFileText, BsGlobe, BsPerson } from "react-icons/bs";
 import {
   searchInstitutions as apiSearchInstitutions,
   getInstitutionWorks,
+  getInstitutionAuthors,
   searchWorks,
   getWork,
+  countryFlag,
   type InstitutionSummary,
+  type InstitutionAuthor,
   type Work,
 } from "../../api/works";
 import { humanizeAuthors } from "../../utils/authorNames";
@@ -16,7 +20,13 @@ import "./GlobePanel.css";
 
 type NavEntry =
   | { kind: "home" }
-  | { kind: "institution"; inst: ClickedInstitution; works: Work[] | null; loading: boolean }
+  | {
+      kind: "institution";
+      inst: ClickedInstitution;
+      works: Work[] | null;
+      authors: InstitutionAuthor[] | null;
+      loading: boolean;
+    }
   | { kind: "work"; workId: string };
 
 type GlobePanelProps = {
@@ -26,6 +36,7 @@ type GlobePanelProps = {
 };
 
 export default function GlobePanel({ isOpen, onClose, clickedInstitution }: GlobePanelProps) {
+  const navigate = useNavigate();
   const [nav, setNav]               = useState<NavEntry[]>([{ kind: "home" }]);
   const [query, setQuery]           = useState("");
   const [instResults, setInstResults] = useState<InstitutionSummary[]>([]);
@@ -37,9 +48,15 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
 
   useEffect(() => {
     if (!clickedInstitution) return;
-    const entry: NavEntry = { kind: "institution", inst: clickedInstitution, works: null, loading: true };
+    const entry: NavEntry = {
+      kind: "institution",
+      inst: clickedInstitution,
+      works: null,
+      authors: null,
+      loading: true,
+    };
     setNav([{ kind: "home" }, entry]);
-    fetchWorks(clickedInstitution.id);
+    fetchInstitutionData(clickedInstitution.id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clickedInstitution?.id]);
 
@@ -51,26 +68,24 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
     setNav((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
   }
 
-  function fetchWorks(id: string) {
-    getInstitutionWorks(id)
-      .then((works) => {
+  function fetchInstitutionData(id: string) {
+    Promise.allSettled([getInstitutionWorks(id), getInstitutionAuthors(id)]).then(
+      ([worksResult, authorsResult]) => {
         setNav((prev) => {
           const last = prev[prev.length - 1];
-          if (last.kind === "institution" && last.inst.id === id) {
-            return [...prev.slice(0, -1), { ...last, works, loading: false }];
-          }
-          return prev;
+          if (last.kind !== "institution" || last.inst.id !== id) return prev;
+          return [
+            ...prev.slice(0, -1),
+            {
+              ...last,
+              works: worksResult.status === "fulfilled" ? worksResult.value : [],
+              authors: authorsResult.status === "fulfilled" ? authorsResult.value : [],
+              loading: false,
+            },
+          ];
         });
-      })
-      .catch(() => {
-        setNav((prev) => {
-          const last = prev[prev.length - 1];
-          if (last.kind === "institution" && last.inst.id === id) {
-            return [...prev.slice(0, -1), { ...last, works: [], loading: false }];
-          }
-          return prev;
-        });
-      });
+      },
+    );
   }
 
   function openInstitution(summary: InstitutionSummary) {
@@ -78,12 +93,15 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
       id: summary.id,
       name: summary.name,
       workCount: summary.workCount,
+      // Not available on a search result (only on a map-click) — the author
+      // list fetched just below fills in the real count once it loads.
+      authorCount: 0,
       citationCount: summary.citationCount,
       countryCode: summary.countryCode,
     };
-    const entry: NavEntry = { kind: "institution", inst, works: null, loading: true };
+    const entry: NavEntry = { kind: "institution", inst, works: null, authors: null, loading: true };
     push(entry);
-    fetchWorks(inst.id);
+    fetchInstitutionData(inst.id);
   }
 
   function openWork(id: string) {
@@ -176,8 +194,10 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
           <InstitutionView
             inst={current.inst}
             works={current.works}
+            authors={current.authors}
             loading={current.loading}
             onWorkClick={openWork}
+            onAuthorClick={(authorId) => navigate(`/author/${authorId}`)}
           />
         )}
         {showWork && current.kind === "work" && (
@@ -259,13 +279,17 @@ function ResultsView({
 function InstitutionView({
   inst,
   works,
+  authors,
   loading,
   onWorkClick,
+  onAuthorClick,
 }: {
   inst: ClickedInstitution;
   works: Work[] | null;
+  authors: InstitutionAuthor[] | null;
   loading: boolean;
   onWorkClick: (id: string) => void;
+  onAuthorClick: (authorId: string) => void;
 }) {
   return (
     <div>
@@ -298,6 +322,32 @@ function InstitutionView({
               <span className="globePanelCardMeta">
                 {work.publication_year}
                 {work.cited_by_count > 0 && <> · {work.cited_by_count.toLocaleString()} citations</>}
+              </span>
+            </div>
+          </button>
+        ))}
+      </section>
+
+      <section className="globePanelSection">
+        <h4 className="globePanelSectionTitle">
+          Authors {authors && <span className="globePanelCount">{authors.length}</span>}
+        </h4>
+        {loading && <p className="globePanelEmptyText">Loading…</p>}
+        {!loading && authors?.length === 0 && <p className="globePanelEmptyText">No authors found.</p>}
+        {!loading && authors?.map((author) => (
+          <button
+            key={author.author_id}
+            className="globePanelCard"
+            onClick={() => onAuthorClick(author.author_id)}
+          >
+            <BsPerson size={13} className="globePanelCardIcon" />
+            <div className="globePanelCardText">
+              <span className="globePanelCardName">
+                {countryFlag(author.country_code)} {humanizeAuthors(author.display_name) || author.author_id}
+              </span>
+              <span className="globePanelCardMeta">
+                {author.works_count} {author.works_count === 1 ? "work" : "works"}
+                {author.cited_by_count > 0 && <> · {author.cited_by_count.toLocaleString()} citations</>}
               </span>
             </div>
           </button>

@@ -22,6 +22,7 @@
     "echarts": "^6.1.0",
     "echarts-for-react": "^3.0.6",
     "echarts-gl": "^2.0.9",
+    "i18n-iso-countries": "^7.14.0",
     "liquid-glass-react": "^1.1.1",
     "maplibre-gl": "^6.11.2",
     "react": "^19.2.4",
@@ -29,7 +30,9 @@
     "react-icons": "^5.6.0",
     "react-router-dom": "^7.13.0",
     "three": "^0.186.1",
-    "tslib": "^2.8.1"
+    "topojson-client": "^3.1.0",
+    "tslib": "^2.8.1",
+    "world-atlas": "^2.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -39,6 +42,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
+    "@types/topojson-client": "^3.1.5",
     "@vitejs/plugin-react": "^5.1.1",
     "@vitest/ui": "^5.0.2",
     "eslint": "^9.39.1",

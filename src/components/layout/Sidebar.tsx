@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import {
+  LuBuilding2,
   LuLayoutGrid,
   LuSearch,
   LuUsers,
@@ -15,6 +16,7 @@ import "./sidebar.css";
 const exploreItems = [
   { to: "/search", label: "Search", icon: LuSearch },
   { to: "/authors", label: "Authors", icon: LuUsers },
+  { to: "/institutions", label: "Institutions", icon: LuBuilding2 },
   { to: "/explore-net", label: "Explore Net", icon: LuShare2 },
   { to: "/graph", label: "Graph", icon: LuChartBar },
   { to: "/globe", label: "Globe", icon: LuGlobe },

@@ -1,7 +1,7 @@
+import { useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
-  LuArrowLeft,
   LuBookOpen,
   LuBuilding2,
   LuCalendar,
@@ -15,6 +15,7 @@ import {
   LuTags,
   LuUsers,
 } from "react-icons/lu";
+import BackLink from "../../components/common/BackLink";
 import { countryFlag, getWork, getWorkCoAuthors, getWorkTopics } from "../../api/works";
 import { humanizeAuthors } from "../../utils/authorNames";
 import { fieldColorVar } from "../../utils/fieldColor";
@@ -65,6 +66,14 @@ export default function PaperPage() {
     enabled: !!id,
   });
 
+  const [authorSort, setAuthorSort] = useState<"name" | "institution">("name");
+  const sortedCoAuthors = useMemo(() => {
+    const key = authorSort === "name"
+      ? (a: typeof coAuthors[number]) => humanizeAuthors(a.display_name) || a.author_id
+      : (a: typeof coAuthors[number]) => a.first_institution_name ?? "￿"; // unknown institution sorts last
+    return [...coAuthors].sort((a, b) => key(a).localeCompare(key(b)));
+  }, [coAuthors, authorSort]);
+
   if (isLoading) {
     return (
       <main className="paperPage">
@@ -86,16 +95,11 @@ export default function PaperPage() {
     );
   }
 
-  const institutions = Array.from(
-    new Set(coAuthors.map((a) => a.first_institution_name).filter((n): n is string => Boolean(n))),
-  );
+  const institutions = paper.institutions ?? [];
 
   return (
     <main className="paperPage">
-      <button type="button" className="paperBackLink" onClick={() => navigate(-1)}>
-        <LuArrowLeft aria-hidden="true" />
-        <span>Back</span>
-      </button>
+      <BackLink label="Back" />
 
       <header className="paperHeader">
         <div className="paperTagRow">
@@ -219,35 +223,6 @@ export default function PaperPage() {
               </div>
             </section>
           )}
-
-          <section className="uiCard paperCard">
-            <div className="uiCardHead">
-              <div className="uiCardTitle">
-                <LuUsers aria-hidden="true" />
-                <span>Authors</span>
-              </div>
-              <span className="uiTag">{coAuthors.length || paper.num_authors || "—"}</span>
-            </div>
-            <div className="paperCardBody">
-              {coAuthors.length > 0 ? (
-                <ul className="paperAuthorList">
-                  {coAuthors.map((a) => (
-                    <li key={a.author_id} className="paperAuthorRow">
-                      <Link to={`/author/${a.author_id}`} className="paperAuthorName">
-                        {humanizeAuthors(a.display_name) || a.author_id}
-                      </Link>
-                      <span className="paperAuthorMeta">
-                        {a.country_code && <span>{countryFlag(a.country_code)}</span>}
-                        {a.first_institution_name && <span>{a.first_institution_name}</span>}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="paperAbstract">{humanizeAuthors(paper.authors) || "No author data."}</p>
-              )}
-            </div>
-          </section>
         </div>
 
         <aside className="paperSide">
@@ -302,6 +277,51 @@ export default function PaperPage() {
             </div>
           </section>
 
+          <section className="uiCard paperCard">
+            <div className="uiCardHead">
+              <div className="uiCardTitle">
+                <LuUsers aria-hidden="true" />
+                <span>Authors</span>
+              </div>
+              <div className="paperCardHeadActions">
+                {coAuthors.length > 1 && (
+                  <select
+                    className="authorsSort"
+                    value={authorSort}
+                    onChange={(e) => setAuthorSort(e.target.value as typeof authorSort)}
+                  >
+                    <option value="name">Sort: Name</option>
+                    <option value="institution">Sort: Institution</option>
+                  </select>
+                )}
+                <span className="uiTag">{coAuthors.length || paper.num_authors || "—"}</span>
+              </div>
+            </div>
+            <div className="paperCardBody">
+              {coAuthors.length > 0 ? (
+                <ul className="paperAuthorList">
+                  {sortedCoAuthors.map((a) => (
+                    <li key={a.author_id} className="paperAuthorRow">
+                      <Link to={`/author/${a.author_id}`} className="paperAuthorName">
+                        {humanizeAuthors(a.display_name) || a.author_id}
+                      </Link>
+                      <span className="paperAuthorMeta">
+                        {a.country_code && <span>{countryFlag(a.country_code)}</span>}
+                        {a.first_institution_name && (
+                          <span className="paperAuthorInstitution" title={a.first_institution_name}>
+                            {a.first_institution_name}
+                          </span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="paperAbstract">{humanizeAuthors(paper.authors) || "No author data."}</p>
+              )}
+            </div>
+          </section>
+
           {(paper.oa_url || paper.pdf_url) && (
             <section className="uiCard paperCard">
               <div className="uiCardHead">
@@ -336,8 +356,14 @@ export default function PaperPage() {
                 </div>
               </div>
               <div className="paperCardBody paperTagRow">
-                {institutions.map((name) => (
-                  <span key={name} className="uiTag uiTagMuted">{name}</span>
+                {institutions.map((inst) => (
+                  <Link
+                    key={inst.id}
+                    to={`/institution/${inst.id}`}
+                    className="uiTag uiTagMuted paperInstitutionTag"
+                  >
+                    {inst.name}
+                  </Link>
                 ))}
               </div>
             </section>

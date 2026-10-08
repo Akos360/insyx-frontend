@@ -2,7 +2,8 @@ import ReactECharts from 'echarts-for-react';
 import { useMemo, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { BsArrowLeft, BsGrid } from 'react-icons/bs';
+import { BsGrid } from 'react-icons/bs';
+import BackLink from '../../components/common/BackLink';
 import {
   getStatsByYear, getStatsByField, getStatsScatter, getStatsOaByYear, getStatsFieldPeriod,
   getWorkFields, type ChartFilters,
@@ -64,9 +65,7 @@ export default function SingleChartPage() {
   return (
     <div className="scPage">
       <div className="scTopBar">
-        <Link to="/graph" className="scBack" title="All charts">
-          <BsArrowLeft size={14} /> All Charts
-        </Link>
+        <BackLink to="/graph" label="All Charts" />
 
         <div className="scChartNav">
           <button className="scNavBtn" onClick={prevChart}>‹</button>
