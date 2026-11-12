@@ -188,6 +188,32 @@
   margin: 0;
 }
 
+.globePanelSectionHeaderBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0 14px 0 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.globePanelSectionHeaderBtn:hover .globePanelSectionTitle {
+  color: var(--app-text);
+}
+
+.globePanelSectionChevron {
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+  transition: transform 150ms ease;
+}
+
+.globePanelSectionChevronClosed {
+  transform: rotate(-90deg);
+}
+
 .globePanelCount {
   background: var(--app-surface-strong);
   color: var(--app-text-muted);
@@ -278,6 +304,28 @@
   color: var(--app-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.globePanelOpenFullBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: calc(100% - 28px);
+  margin: 10px 14px 4px;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--app-accent-contrast, #fff);
+  background: var(--app-accent);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 120ms;
+}
+
+.globePanelOpenFullBtn:hover {
+  background: var(--app-accent-strong);
 }
 
 /* ─── Work detail ────────────────────────────────────────────────────── */

@@ -1,0 +1,33 @@
+.notFoundPage {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+.notFoundCode {
+  margin: 0;
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--app-text-muted, var(--text-3));
+  letter-spacing: 0.02em;
+}
+
+.notFoundTitle {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.notFoundText {
+  margin: 0 0 12px;
+  color: var(--app-text-muted, var(--text-3));
+  font-size: 0.9rem;
+}

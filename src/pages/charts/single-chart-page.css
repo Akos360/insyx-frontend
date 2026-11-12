@@ -18,6 +18,13 @@
   flex-shrink: 0;
 }
 
+/* BackLink's shared .uiBackLink sets align-self: flex-start for its other
+   (column-layout) usages — in THIS row layout that pins it to the top edge
+   instead of centering it with its siblings. */
+.scTopBar .uiBackLink {
+  align-self: center;
+}
+
 .scChartNav {
   flex: 1;
   display: flex;
@@ -79,6 +86,13 @@
   padding: 16px;
   display: flex;
   align-items: stretch;
+  /* The echarts canvas only re-measures on a debounced ResizeObserver tick
+     (see size-sensor's 60ms debounce), which doesn't fire until the sidebar's
+     width transition goes quiet — so for the transition's duration it's still
+     sized for the old width. Clip it so that lag never bleeds over the
+     sidebar; handleFiltersTransitionEnd (SingleChartPage.tsx) then forces an
+     immediate resize right as the transition completes. */
+  overflow: hidden;
 }
 
 .scStatus {
@@ -92,6 +106,58 @@
 
 .scStatusError { color: #e05c5c; }
 
+/* Zoom controls — same visual language as the globe's .globeBtn */
+.scZoomControls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scZoomBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--app-surface-strong);
+  border: 1px solid var(--app-border);
+  border-radius: 5px;
+  color: var(--app-text);
+  cursor: pointer;
+}
+
+.scZoomBtn:hover {
+  background: var(--app-overlay, rgba(128, 128, 128, 0.18));
+}
+
+.scViewToggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.scViewToggleBtn {
+  height: 28px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--app-surface-strong);
+  border: 1px solid var(--app-border);
+  border-radius: 5px;
+  color: var(--app-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.scViewToggleBtn:hover {
+  background: var(--app-overlay, rgba(128, 128, 128, 0.18));
+}
+
 .scCount {
   position: absolute;
   bottom: 8px;
@@ -99,6 +165,25 @@
   font-size: 0.7rem;
   color: var(--app-text-muted);
   opacity: 0.6;
+}
+
+/* ── filter sidebar toggle ── */
+/* Zero-width gutter sitting exactly on the chart/sidebar border — the
+   shared .uiSidebarToggleBtn (see SidebarToggle.tsx) inside it is
+   absolutely positioned off its left edge, so it stays put at that
+   border whether the sidebar is 220px or collapsed to 0. */
+.scFiltersToggleWrap {
+  width: 0;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.scFiltersToggleWrap .uiSidebarToggleBtn {
+  position: absolute;
+  top: 50%;
+  left: -13px;
+  transform: translateY(-50%);
+  z-index: 5;
 }
 
 /* ── filter sidebar ── */
@@ -112,6 +197,14 @@
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
+  transition: width 160ms ease, padding 160ms ease;
+}
+
+.scFiltersCollapsed {
+  width: 0;
+  padding: 0;
+  border-left: none;
+  overflow: hidden;
 }
 
 .scFilterSection {
@@ -197,7 +290,6 @@
 }
 
 .scResetBtn {
-  margin-top: auto;
   padding: 7px 12px;
   background: none;
   border: 1px solid var(--app-border);
@@ -212,6 +304,17 @@
   color: var(--app-text);
 }
 
+/* Shows the chart-click selection (see ChartSelectionContent) inline in the
+   sidebar instead of a floating toast — set apart with its own background
+   since it's live/contextual, not a static filter control. */
+.scSelectionPanel {
+  padding: 10px;
+  margin: 0 -4px;
+  border-radius: 6px;
+  background: var(--app-bg);
+  border: 1px solid var(--app-border);
+}
+
 /* ── responsive (@container reacts to .appShellContent's actual width, not
    the raw window — see app-shell.css) ── */
 @container (max-width: 1024px) {
@@ -220,14 +323,19 @@
 
 @container (max-width: 640px) {
   .scBody { flex-direction: column; }
-  .scFilters {
+  /* Stacked layout — no side border to straddle, so the toggle doesn't apply. */
+  .scFiltersToggleWrap { display: none; }
+  .scFilters,
+  .scFilters.scFiltersCollapsed {
     width: 100%;
+    padding: 16px 14px;
     border-left: none;
     border-top: 1px solid var(--app-border);
     flex-direction: row;
     flex-wrap: wrap;
     gap: 12px;
     max-height: 180px;
+    overflow-y: auto;
   }
   .scFilterSectionFields { min-width: 100%; }
   .scChartArea { min-height: 300px; }

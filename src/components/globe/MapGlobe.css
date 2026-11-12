@@ -89,18 +89,20 @@
 /* Non-compact: container top:10 (MapLibre default) + the group's own 10px
    margin + its 104px height (3 stacked 34px buttons + 2px group border) +
    a 10px gap = 134. Buttons start there, each 44px apart (36px + 8px gap). */
-.globeProjectionToggle { top: 134px; }
-.globeResetBtn         { top: 178px; }
-.globeScreenshotBtn    { top: 222px; }
-.globeFullscreenBtn    { top: 266px; }
+.globeProjectionToggle      { top: 134px; }
+.globeResetBtn              { top: 178px; }
+.globeScreenshotBtn         { top: 222px; }
+.globeFullscreenBtn         { top: 266px; }
+.globeInstitutionsToggleBtn { top: 310px; }
 
 /* Compact: push MapLibre's ctrl group below the 25px expand button in the card corner. */
 .mapGlobeWrapperCompact .maplibregl-ctrl-top-right {
   top: 30px;
 }
 /* Same 10(margin)+104(group)+10(gap) math as above, offset by the container's top:30. */
-.mapGlobeWrapperCompact .globeProjectionToggle { top: 154px; }
-.mapGlobeWrapperCompact .globeResetBtn         { top: 198px; }
+.mapGlobeWrapperCompact .globeProjectionToggle      { top: 154px; }
+.mapGlobeWrapperCompact .globeResetBtn              { top: 198px; }
+.mapGlobeWrapperCompact .globeInstitutionsToggleBtn { top: 242px; }
 
 /* The explorer side panel (GlobePanel) overlays the map's right edge when
    open, hiding these controls underneath it — shift them left by the panel
@@ -125,4 +127,72 @@
 @container (max-width: 640px) {
   .globeMapAreaPanelOpen .maplibregl-ctrl-top-right { right: 0; }
   .globeMapAreaPanelOpen .globeBtn                  { right: 10px; }
+}
+
+/* ─── Legend ──────────────────────────────────────────────────────────
+   Bottom-left is otherwise empty (attribution is disabled, nav/custom
+   controls are all top-right) — kept deliberately terse per its own design
+   brief: two short lines plus the current view's real counts, not a full
+   explanation. */
+
+.globeLegend {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 10px;
+  background: var(--app-surface-strong);
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  font-size: 0.68rem;
+  color: var(--app-text-muted);
+  line-height: 1.3;
+  pointer-events: none;
+}
+
+.globeLegendRow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.globeLegendSwatch {
+  width: 46px;
+  height: 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.globeLegendHeightBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  width: 46px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.globeLegendBar {
+  display: inline-block;
+  width: 7px;
+  border-radius: 1px;
+  background: var(--app-text-muted);
+  opacity: 0.6;
+}
+
+.globeLegendBarSm { height: 4px;  }
+.globeLegendBarMd { height: 8px;  }
+.globeLegendBarLg { height: 13px; }
+
+.globeLegendText {
+  white-space: nowrap;
+}
+
+.globeLegendRange {
+  font-weight: 600;
+  color: var(--app-text);
+  white-space: nowrap;
 }

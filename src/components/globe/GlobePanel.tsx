@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { IoClose, IoChevronBack, IoSearch } from "react-icons/io5";
-import { BsBuilding, BsFileText, BsGlobe, BsPerson } from "react-icons/bs";
+import { IoClose, IoChevronBack, IoChevronDown, IoSearch } from "react-icons/io5";
+import { BsBuilding, BsFileText, BsGlobe, BsPerson, BsArrowUpRightSquare } from "react-icons/bs";
 import {
   searchInstitutions as apiSearchInstitutions,
   getInstitutionWorks,
@@ -15,6 +15,8 @@ import {
   type Work,
 } from "../../api/works";
 import { humanizeAuthors } from "../../utils/authorNames";
+import { doiUrl } from "../../utils/doi";
+import Highlight from "../common/Highlight";
 import type { ClickedInstitution } from "./MapGlobe";
 import "./GlobePanel.css";
 
@@ -78,8 +80,10 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
             ...prev.slice(0, -1),
             {
               ...last,
-              works: worksResult.status === "fulfilled" ? worksResult.value : [],
-              authors: authorsResult.status === "fulfilled" ? authorsResult.value : [],
+              // Just the first page — this compact panel isn't meant for
+              // exhaustive browsing, "View full institution page" is.
+              works: worksResult.status === "fulfilled" ? worksResult.value.items : [],
+              authors: authorsResult.status === "fulfilled" ? authorsResult.value.items : [],
               loading: false,
             },
           ];
@@ -186,18 +190,24 @@ export default function GlobePanel({ isOpen, onClose, clickedInstitution }: Glob
           <ResultsView
             institutions={instResults}
             works={workResults}
+            query={query}
             onInstitutionClick={openInstitution}
             onWorkClick={openWork}
           />
         )}
         {showInstitution && current.kind === "institution" && (
           <InstitutionView
+            // Remounts fresh on every new institution, so Papers/Authors
+            // always come up open by default rather than keeping whichever
+            // one you last collapsed on a different institution.
+            key={current.inst.id}
             inst={current.inst}
             works={current.works}
             authors={current.authors}
             loading={current.loading}
             onWorkClick={openWork}
             onAuthorClick={(authorId) => navigate(`/author/${authorId}`)}
+            onOpenFullPage={() => navigate(`/institution/${current.inst.id}`)}
           />
         )}
         {showWork && current.kind === "work" && (
@@ -220,11 +230,13 @@ function HomeView() {
 function ResultsView({
   institutions,
   works,
+  query,
   onInstitutionClick,
   onWorkClick,
 }: {
   institutions: InstitutionSummary[];
   works: Work[];
+  query: string;
   onInstitutionClick: (i: InstitutionSummary) => void;
   onWorkClick: (id: string) => void;
 }) {
@@ -242,7 +254,7 @@ function ResultsView({
             <button key={inst.id} className="globePanelCard" onClick={() => onInstitutionClick(inst)}>
               <BsBuilding size={13} className="globePanelCardIcon" />
               <div className="globePanelCardText">
-                <span className="globePanelCardName">{inst.name}</span>
+                <span className="globePanelCardName"><Highlight text={inst.name} query={query} /></span>
                 <span className="globePanelCardMeta">
                   {inst.countryCode && <>{inst.countryCode} · </>}
                   {inst.workCount} works · {inst.citationCount.toLocaleString()} citations
@@ -262,7 +274,7 @@ function ResultsView({
             <button key={work.id} className="globePanelCard" onClick={() => onWorkClick(work.id)}>
               <BsFileText size={13} className="globePanelCardIcon" />
               <div className="globePanelCardText">
-                <span className="globePanelCardName">{work.title}</span>
+                <span className="globePanelCardName"><Highlight text={work.title} query={query} /></span>
                 <span className="globePanelCardMeta">
                   {work.publication_year}
                   {work.cited_by_count > 0 && <> · {work.cited_by_count.toLocaleString()} citations</>}
@@ -276,6 +288,40 @@ function ResultsView({
   );
 }
 
+// Papers and Authors each open by default (per the per-institution `key` on
+// InstitutionView) but collapse independently, so e.g. collapsing a long
+// Papers list leaves Authors visible without scrolling past it.
+function CollapsibleSection({
+  title,
+  count,
+  children,
+}: {
+  title: string;
+  count?: number;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(true);
+  return (
+    <section className="globePanelSection">
+      <button
+        type="button"
+        className="globePanelSectionHeaderBtn"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
+        <span className="globePanelSectionTitle">
+          {title} {count !== undefined && <span className="globePanelCount">{count}</span>}
+        </span>
+        <IoChevronDown
+          size={13}
+          className={`globePanelSectionChevron${open ? "" : " globePanelSectionChevronClosed"}`}
+        />
+      </button>
+      {open && children}
+    </section>
+  );
+}
+
 function InstitutionView({
   inst,
   works,
@@ -283,6 +329,7 @@ function InstitutionView({
   loading,
   onWorkClick,
   onAuthorClick,
+  onOpenFullPage,
 }: {
   inst: ClickedInstitution;
   works: Work[] | null;
@@ -290,6 +337,7 @@ function InstitutionView({
   loading: boolean;
   onWorkClick: (id: string) => void;
   onAuthorClick: (authorId: string) => void;
+  onOpenFullPage: () => void;
 }) {
   return (
     <div>
@@ -310,8 +358,12 @@ function InstitutionView({
         )}
       </div>
 
-      <section className="globePanelSection">
-        <h4 className="globePanelSectionTitle">Papers</h4>
+      <button className="globePanelOpenFullBtn" onClick={onOpenFullPage}>
+        <BsArrowUpRightSquare size={13} />
+        View full institution page
+      </button>
+
+      <CollapsibleSection title="Papers" count={works?.length}>
         {loading && <p className="globePanelEmptyText">Loading…</p>}
         {!loading && works?.length === 0 && <p className="globePanelEmptyText">No papers found.</p>}
         {!loading && works?.map((work) => (
@@ -326,12 +378,9 @@ function InstitutionView({
             </div>
           </button>
         ))}
-      </section>
+      </CollapsibleSection>
 
-      <section className="globePanelSection">
-        <h4 className="globePanelSectionTitle">
-          Authors {authors && <span className="globePanelCount">{authors.length}</span>}
-        </h4>
+      <CollapsibleSection title="Authors" count={authors?.length}>
         {loading && <p className="globePanelEmptyText">Loading…</p>}
         {!loading && authors?.length === 0 && <p className="globePanelEmptyText">No authors found.</p>}
         {!loading && authors?.map((author) => (
@@ -352,18 +401,20 @@ function InstitutionView({
             </div>
           </button>
         ))}
-      </section>
+      </CollapsibleSection>
     </div>
   );
 }
 
 function WorkView({ workId }: { workId: string }) {
-  const { data: paper, isLoading, isError } = useQuery({
+  // isPending (not isLoading): see SearchPage.tsx for why, under
+  // PersistQueryClientProvider.
+  const { data: paper, isPending, isError } = useQuery({
     queryKey: ['works', 'detail', workId],
     queryFn: () => getWork(workId),
   });
 
-  if (isLoading) return <p className="globePanelEmptyText">Loading…</p>;
+  if (isPending) return <p className="globePanelEmptyText">Loading…</p>;
   if (isError || !paper) return <p className="globePanelEmptyText">Paper not found.</p>;
 
   return (
@@ -398,7 +449,7 @@ function WorkView({ workId }: { workId: string }) {
 
       <div className="globePanelWorkLinks">
         {paper.doi && (
-          <a href={`https://doi.org/${paper.doi}`} target="_blank" rel="noopener noreferrer" className="globePanelLink">
+          <a href={doiUrl(paper.doi)} target="_blank" rel="noopener noreferrer" className="globePanelLink">
             DOI ↗
           </a>
         )}

@@ -5,13 +5,14 @@ import { CHART_LIST } from '../../charts/chartList';
 import { buildChartOption, makeThemeColors } from '../../charts/buildChartOption';
 import { useWorksStats } from '../../charts/useWorksStats';
 import { useTheme } from '../../theme/useTheme';
+import { ChartSkeleton } from '../common/Skeletons';
 
 const STALE = 5 * 60 * 1000;
 
 export default function GraphPreview() {
   const { theme } = useTheme();
   const [idx, setIdx] = useState(0);
-  const { data } = useWorksStats({ staleTime: STALE });
+  const { data, isPending } = useWorksStats({ staleTime: STALE });
 
   const options = useMemo(() => {
     const ct = makeThemeColors(theme === 'dark');
@@ -42,12 +43,16 @@ export default function GraphPreview() {
         </button>
       </div>
 
-      <ReactECharts
-        key={idx}
-        option={options[idx]}
-        notMerge
-        style={{ position: 'absolute', inset: '28px 0 0 0', width: '100%', height: 'calc(100% - 28px)' }}
-      />
+      <div style={{ position: 'absolute', inset: '28px 0 0 0', width: '100%', height: 'calc(100% - 28px)' }}>
+        {isPending ? <ChartSkeleton /> : (
+          <ReactECharts
+            key={idx}
+            option={options[idx]}
+            notMerge
+            style={{ width: '100%', height: '100%' }}
+          />
+        )}
+      </div>
     </>
   );
 }

@@ -1,43 +1,56 @@
 import ReactECharts from 'echarts-for-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BsBoxArrowUpRight } from 'react-icons/bs';
 import BackLink from '../../components/common/BackLink';
-import { getAuthor, countryFlag } from '../../api/works';
+import { WorkRowSkeleton, ChartSkeleton } from '../../components/common/Skeletons';
+import { getAuthor, countryFlag, type AuthorPaper } from '../../api/works';
 import { humanizeAuthors } from '../../utils/authorNames';
 import { makeThemeColors } from '../../charts/buildChartOption';
 import { useTheme } from '../../theme/useTheme';
 import './author-page.css';
 
+// Matches the backend's own PaginationQueryDto default (see works.service.ts).
+const PAGE_SIZE = 25;
+
 export default function AuthorPage() {
   const { authorId = '' } = useParams<{ authorId: string }>();
   const { theme } = useTheme();
 
-  const { data: profile, isLoading, isError } = useQuery({
+  // isPending, not isLoading — under PersistQueryClientProvider, isLoading is
+  // falsely false during the IndexedDB-restore window (pending but not yet
+  // fetching), which would flash the "not found" state on every hard refresh.
+  const { data: profile, isPending, isError } = useQuery({
     queryKey: ['author', authorId],
-    queryFn: () => getAuthor(authorId),
+    queryFn: () => getAuthor(authorId, { limit: PAGE_SIZE }),
     enabled: !!authorId,
   });
 
-  const papers = profile?.papers ?? [];
+  // The query above only ever holds the first page — "Load more" appends
+  // additional pages here instead of refetching everything, so clicking it
+  // repeatedly doesn't re-request papers already on screen.
+  const [papers, setPapers] = useState<AuthorPaper[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  useEffect(() => {
+    setPapers(profile?.papers ?? []);
+  }, [profile]);
 
-  const [papersSort, setPapersSort] = useState<'year' | 'citations' | 'title'>('year');
-  const sortedPapers = useMemo(() => {
-    const sorted = [...papers];
-    if (papersSort === 'year') sorted.sort((a, b) => (b.publication_year ?? 0) - (a.publication_year ?? 0));
-    else if (papersSort === 'citations') sorted.sort((a, b) => (b.cited_by_count ?? 0) - (a.cited_by_count ?? 0));
-    else sorted.sort((a, b) => (a.title ?? '').localeCompare(b.title ?? ''));
-    return sorted;
-  }, [papers, papersSort]);
+  async function loadMorePapers() {
+    if (isLoadingMore) return;
+    setIsLoadingMore(true);
+    try {
+      const next = await getAuthor(authorId, { limit: PAGE_SIZE, offset: papers.length });
+      setPapers((prev) => [...prev, ...(next?.papers ?? [])]);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }
 
-  const stats = useMemo(() => {
-    const totalCitations = papers.reduce((s, p) => s + (p.cited_by_count ?? 0), 0);
-    const years = papers.map(p => p.publication_year).filter(Boolean);
-    const fields = [...new Set(papers.map(p => p.field).filter(Boolean))];
-    return { totalCitations, years, fields };
-  }, [papers]);
-
+  // Citation total, fields, active years, and both charts below are computed
+  // server-side from the author's *entire* paper list (see
+  // WorksService.authorDetail) — `papers` here only ever holds the pages
+  // loaded so far, which would silently under-count/mis-chart otherwise.
   const { citationsChart, papersYearChart } = useMemo(() => {
     const ct = makeThemeColors(theme === 'dark');
     const ax = {
@@ -47,10 +60,7 @@ export default function AuthorPage() {
       axisTick:  { show: false },
     };
 
-    // Horizontal bar: easiest to read author impact.
-    const sorted = [...papers]
-      .sort((a, b) => (b.cited_by_count ?? 0) - (a.cited_by_count ?? 0))
-      .slice(0, 10);
+    const topCited = [...(profile?.topCitedPapers ?? [])].reverse();
 
     const citationsChart = {
       backgroundColor: 'transparent',
@@ -59,45 +69,74 @@ export default function AuthorPage() {
       xAxis: { type: 'value', ...ax, axisLabel: { ...ax.axisLabel, formatter: (v: number) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : String(v) } },
       yAxis: {
         type: 'category',
-        data: sorted.map(p => {
+        data: topCited.map(p => {
           const t = p.title ?? p.id;
           return t.length > 32 ? t.slice(0, 30) + '…' : t;
-        }).reverse(),
+        }),
         ...ax,
         axisLabel: { ...ax.axisLabel, fontSize: 10 },
       },
       series: [{
         type: 'bar',
-        data: sorted.map(p => p.cited_by_count ?? 0).reverse(),
+        data: topCited.map(p => p.cited_by_count ?? 0),
         itemStyle: { color: ct.colors[0], borderRadius: [0, 3, 3, 0] },
         barMaxWidth: 28,
       }],
     };
 
-    const yearCounts: Record<number, number> = {};
-    for (const p of papers) {
-      if (p.publication_year) yearCounts[p.publication_year] = (yearCounts[p.publication_year] ?? 0) + 1;
-    }
-    const sortedYears = Object.keys(yearCounts).map(Number).sort();
+    const byYear = profile?.papersByYear ?? [];
 
     const papersYearChart = {
       backgroundColor: 'transparent',
       grid: { left: 12, right: 12, top: 8, bottom: 8, containLabel: true },
       tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: sortedYears.map(String), ...ax, axisLabel: { ...ax.axisLabel, rotate: 30 } },
+      xAxis: { type: 'category', data: byYear.map(y => String(y.year)), ...ax, axisLabel: { ...ax.axisLabel, rotate: 30 } },
       yAxis: { type: 'value', ...ax, minInterval: 1 },
       series: [{
         type: 'bar',
-        data: sortedYears.map(y => yearCounts[y]),
+        data: byYear.map(y => y.count),
         itemStyle: { color: ct.colors[2], borderRadius: [3, 3, 0, 0] },
         barMaxWidth: 36,
       }],
     };
 
     return { citationsChart, papersYearChart };
-  }, [papers, theme]);
+  }, [profile?.topCitedPapers, profile?.papersByYear, theme]);
 
-  if (isLoading) return <div className="authorPage"><div className="authorStatus">Loading…</div></div>;
+  if (isPending) return (
+    <div className="authorPage">
+      <BackLink to="/authors" label="All Authors" />
+      <div className="authorHeader">
+        <div className="authorHeaderMain">
+          <span className="uiSkel" style={{ width: 40, height: 40, borderRadius: '50%' }} />
+          <div>
+            <span className="uiSkel" style={{ display: 'block', height: 22, width: 180, marginBottom: 8 }} />
+            <span className="uiSkel" style={{ display: 'block', height: 13, width: 120 }} />
+          </div>
+        </div>
+      </div>
+      <div className="authorStats">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div className="authorStat" key={i}>
+            <span className="uiSkel" style={{ display: 'block', height: 20, width: 40, marginBottom: 6 }} />
+            <span className="uiSkel" style={{ display: 'block', height: 10, width: 60 }} />
+          </div>
+        ))}
+      </div>
+      <div className="authorBody">
+        <div className="authorSection authorPapers">
+          <div className="authorSectionTitle">Works</div>
+          <div className="authorPaperList">
+            {Array.from({ length: 4 }).map((_, i) => <WorkRowSkeleton key={i} />)}
+          </div>
+        </div>
+        <div className="authorCharts">
+          <div className="authorChartBlock"><ChartSkeleton /></div>
+          <div className="authorChartBlock"><ChartSkeleton /></div>
+        </div>
+      </div>
+    </div>
+  );
   if (isError || !profile) return (
     <div className="authorPage">
       <div className="authorStatus">Author not found. <Link to="/authors">Back to authors</Link></div>
@@ -141,49 +180,42 @@ export default function AuthorPage() {
 
       <div className="authorStats">
         <div className="authorStat">
-          <span className="authorStatValue">{papers.length}</span>
+          <span className="authorStatValue">{profile.papersTotal}</span>
           <span className="authorStatLabel">Papers</span>
         </div>
         <div className="authorStat">
-          <span className="authorStatValue">{stats.totalCitations.toLocaleString()}</span>
+          <span className="authorStatValue">{profile.totalCitations.toLocaleString()}</span>
           <span className="authorStatLabel">Total citations</span>
         </div>
         <div className="authorStat">
-          <span className="authorStatValue">{stats.fields.length}</span>
-          <span className="authorStatLabel">{stats.fields.length === 1 ? 'Field' : 'Fields'}</span>
+          <span className="authorStatValue">{profile.hIndex}</span>
+          <span className="authorStatLabel">h-index</span>
         </div>
-        {stats.years.length > 1 && (
+        <div className="authorStat">
+          <span className="authorStatValue">{profile.fields.length}</span>
+          <span className="authorStatLabel">{profile.fields.length === 1 ? 'Field' : 'Fields'}</span>
+        </div>
+        {profile.yearsActive && (
           <div className="authorStat">
-            <span className="authorStatValue">{Math.min(...stats.years)}–{Math.max(...stats.years)}</span>
+            <span className="authorStatValue">{profile.yearsActive.min}–{profile.yearsActive.max}</span>
             <span className="authorStatLabel">Active</span>
           </div>
         )}
       </div>
 
-      {stats.fields.length > 0 && (
+      {profile.fields.length > 0 && (
         <div className="authorFieldRow">
-          {stats.fields.map(f => <span key={f} className="authorFieldTag">{f}</span>)}
+          {profile.fields.map(f => <span key={f} className="authorFieldTag">{f}</span>)}
         </div>
       )}
 
       <div className="authorBody">
         <div className="authorSection authorPapers">
           <div className="authorSectionHead">
-            <div className="authorSectionTitle">Works ({papers.length})</div>
-            {papers.length > 1 && (
-              <select
-                className="authorsSort"
-                value={papersSort}
-                onChange={(e) => setPapersSort(e.target.value as typeof papersSort)}
-              >
-                <option value="year">Sort: Year</option>
-                <option value="citations">Sort: Citations</option>
-                <option value="title">Sort: Title</option>
-              </select>
-            )}
+            <div className="authorSectionTitle">Works ({profile.papersTotal})</div>
           </div>
           <div className="authorPaperList">
-            {sortedPapers.map(p => (
+            {papers.map(p => (
               <Link key={p.id} to={`/paper/${p.id}`} className="authorPaperItem">
                 <div className="authorPaperMeta">
                   <span className="authorPaperYear">{p.publication_year}</span>
@@ -202,9 +234,19 @@ export default function AuthorPage() {
               </Link>
             ))}
           </div>
+          {papers.length < profile.papersTotal && (
+            <button
+              type="button"
+              className="uiBtn uiBtnSecondary authorLoadMoreBtn"
+              onClick={loadMorePapers}
+              disabled={isLoadingMore}
+            >
+              {isLoadingMore ? 'Loading…' : `Load more (${profile.papersTotal - papers.length} remaining)`}
+            </button>
+          )}
         </div>
 
-        {papers.length > 1 && (
+        {profile.papersTotal > 1 && (
           <div className="authorCharts">
             <div className="authorChartBlock">
               <div className="authorSectionTitle">Citations per work</div>

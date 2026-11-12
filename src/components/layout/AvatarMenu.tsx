@@ -44,7 +44,10 @@ export default function AvatarMenu() {
   async function handleLogout() {
     setOpen(false);
     await logout();
-    navigate("/");
+    // replace: true — on a RequireAuth-gated page, logout's setUser(null) already
+    // triggers RequireAuth's own <Navigate to="/" replace/>; a plain push here
+    // would otherwise leave a duplicate "/" entry in history behind it.
+    navigate("/", { replace: true });
   }
 
   return (

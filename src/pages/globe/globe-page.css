@@ -12,38 +12,33 @@
 .globePageFallback {
   width: 100%;
   height: 100%;
-  background: var(--app-bg);
+  border-radius: 0;
 }
 
-/* ─── Panel open tab ─────────────────────────────────────────────────── */
+/* ─── Panel toggle ────────────────────────────────────────────────────
+   Straddles the panel's left edge (see GlobePanel.css's matching widths:
+   360px / min(300px,90vw) / 100vw) — same numbers .globeMapAreaPanelOpen
+   already uses to shift the globe's own controls out of the panel's way. */
 
-.globePanelTab {
+.globePanelToggleWrap {
   position: absolute;
-  right: 0;
   top: 50%;
+  right: 6px;
   transform: translateY(-50%);
-  width: 28px;
-  height: 60px;
-  background: var(--app-surface-strong);
-  border: 1px solid var(--app-border);
-  border-right: none;
-  border-radius: 6px 0 0 6px;
-  color: var(--app-text-muted);
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 15;
-  transition: opacity 180ms, color 120ms, background 120ms;
+  z-index: 21;
+  transition: right 220ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.globePanelTab:hover {
-  background: var(--app-overlay);
-  color: var(--app-text);
+.globePanelToggleWrapOpen {
+  right: 347px;
 }
 
-.globePanelTabHidden {
-  opacity: 0;
-  pointer-events: none;
+@container (max-width: 1024px) {
+  .globePanelToggleWrapOpen { right: 287px; }
+}
+
+@container (max-width: 640px) {
+  /* Panel covers the full width here — toggle stays docked at the edge,
+     same as .globeMapAreaPanelOpen .globeBtn does at this breakpoint. */
+  .globePanelToggleWrapOpen { right: -13px; }
 }

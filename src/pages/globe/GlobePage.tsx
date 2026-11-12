@@ -1,5 +1,6 @@
 import { Suspense, lazy, useState } from "react";
 import GlobePanel from "../../components/globe/GlobePanel";
+import SidebarToggle from "../../components/common/SidebarToggle";
 import type { ClickedInstitution } from "../../components/globe/MapGlobe";
 import "./globe-page.css";
 
@@ -21,19 +22,21 @@ export default function GlobePage() {
   return (
     <div className="globePage">
       <div className={`globeMapArea${isPanelOpen ? " globeMapAreaPanelOpen" : ""}`}>
-        <Suspense fallback={<div className="globePageFallback" />}>
+        <Suspense fallback={<div className="globePageFallback uiSkel" />}>
           <MapGlobe onInstitutionClick={handleInstitutionClick} />
         </Suspense>
       </div>
 
-      {/* Tab button — visible when panel is closed */}
-      <button
-        className={`globePanelTab${isPanelOpen ? " globePanelTabHidden" : ""}`}
-        onClick={() => setIsPanelOpen(true)}
-        title="Open explorer panel"
-      >
-        ‹
-      </button>
+      {/* Tracks the panel's left edge (see globe-page.css) so the same
+          button both opens it (closed state) and closes it (open state). */}
+      <div className={`globePanelToggleWrap${isPanelOpen ? " globePanelToggleWrapOpen" : ""}`}>
+        <SidebarToggle
+          open={isPanelOpen}
+          onToggle={() => setIsPanelOpen(o => !o)}
+          openTitle="Close explorer panel"
+          closedTitle="Open explorer panel"
+        />
+      </div>
 
       <GlobePanel
         isOpen={isPanelOpen}

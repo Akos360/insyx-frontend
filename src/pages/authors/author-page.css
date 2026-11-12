@@ -330,6 +330,11 @@
   gap: 6px;
 }
 
+.authorLoadMoreBtn {
+  align-self: center;
+  margin-top: 10px;
+}
+
 .authorPaperItem {
   display: flex;
   flex-direction: column;

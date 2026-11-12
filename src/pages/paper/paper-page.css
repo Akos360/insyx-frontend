@@ -150,6 +150,20 @@
   line-height: 1.65;
 }
 
+.paperBibtexBox {
+  margin: 0;
+  padding: 12px;
+  background: var(--app-surface-soft, var(--panel-2));
+  border: 1px solid var(--app-border, var(--border));
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text-2);
+}
+
 .paperAuthorList {
   list-style: none;
   margin: 0;

@@ -336,3 +336,39 @@
   width: 16px;
   height: 16px;
 }
+
+/* Shared chevron button for SidebarToggle (src/components/common/SidebarToggle.tsx)
+   — the single open/close control for a sliding or collapsible side panel. */
+.uiSidebarToggleBtn {
+  width: 26px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--app-surface-strong);
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  color: var(--app-text-muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.uiSidebarToggleBtn:hover {
+  background: var(--app-overlay, rgba(128, 128, 128, 0.18));
+  color: var(--app-text);
+}
+
+/* Shared match highlight for Highlight.tsx — marks exactly the substring a
+   search term matched, wherever a search result is rendered. Fixed colors
+   (not theme variables) deliberately — a conventional "highlighter" amber
+   reads consistently in both themes, instead of reusing the accent color
+   already used for buttons/badges elsewhere. */
+.uiHighlight {
+  background: #ffe066;
+  color: #1a1a1a;
+  border-radius: 2px;
+  padding: 0 1px;
+  font-weight: 700;
+}

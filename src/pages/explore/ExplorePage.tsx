@@ -30,7 +30,7 @@ export default function ExplorePage() {
         {sections.map((section) => (
           <div key={section.id} className={cardClass(section.to)}>
             {section.to === "/globe" ? (
-              <Suspense fallback={<div className="exploreCardGlobeFallback" />}>
+              <Suspense fallback={<div className="exploreCardGlobeFallback uiSkel" />}>
                 <MapGlobe compact />
               </Suspense>
             ) : section.to === "/explore-net" ? (

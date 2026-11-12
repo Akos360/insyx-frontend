@@ -68,12 +68,27 @@
 }
 
 .searchPreviewThTitle {
-  width: 40%;
+  /* No explicit width — in a fixed table layout, the one column left
+     unsized absorbs whatever Year/Citations' fixed widths below don't use,
+     so longer titles get the room right up until Year starts (still
+     ellipsis-truncated by .searchPreviewTd if even that isn't enough). */
+  width: auto;
 }
 
 .searchPreviewThR {
   text-align: right;
-  width: 30%;
+}
+
+.searchPreviewThYear {
+  width: 56px;
+}
+
+.searchPreviewThCitations {
+  /* Reserves room for a large citation count (e.g. "9,999,999") up front,
+     rather than sizing to typical short values — so Year and Citations sit
+     close together normally, with headroom already built in for big numbers
+     instead of the column having to fight Year for space when one shows up. */
+  width: 92px;
 }
 
 .searchPreviewTr {

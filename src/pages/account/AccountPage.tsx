@@ -77,7 +77,10 @@ export default function AccountPage() {
 
   async function handleLogout() {
     await logout();
-    navigate("/");
+    // replace: true — RequireAuth's own <Navigate to="/" replace/> already fires
+    // reactively once setUser(null) lands (this is a gated route); matching
+    // replace here avoids a duplicate "/" entry in history behind it.
+    navigate("/", { replace: true });
   }
 
   if (!user) return null;

@@ -1,0 +1,31 @@
+.chartSelTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text, var(--app-text));
+  line-height: 1.35;
+}
+
+.chartSelMeta {
+  font-size: 12px;
+  color: var(--text-3, var(--app-text-muted));
+}
+
+.chartSelAction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+  height: 34px;
+  border-radius: 7px;
+  border: none;
+  background: var(--primary, #4a7fa8);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chartSelAction:hover {
+  filter: brightness(1.08);
+}

@@ -16,13 +16,14 @@
   "dependencies": {
     "@react-three/fiber": "^9.8.1",
     "@shadergradient/react": "^2.4.20",
+    "@tanstack/query-async-storage-persister": "^5.104.5",
     "@tanstack/react-query": "^5.90.20",
+    "@tanstack/react-query-persist-client": "^5.104.5",
     "axios": "^1.13.5",
-    "bootstrap": "^5.3.8",
     "echarts": "^6.1.0",
     "echarts-for-react": "^3.0.6",
     "echarts-gl": "^2.0.9",
-    "i18n-iso-countries": "^7.14.0",
+    "idb-keyval": "^6.3.0",
     "liquid-glass-react": "^1.1.1",
     "maplibre-gl": "^6.11.2",
     "react": "^19.2.4",
@@ -30,9 +31,7 @@
     "react-icons": "^5.6.0",
     "react-router-dom": "^7.13.0",
     "three": "^0.186.1",
-    "topojson-client": "^3.1.0",
-    "tslib": "^2.8.1",
-    "world-atlas": "^2.0.2"
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -42,7 +41,6 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
-    "@types/topojson-client": "^3.1.5",
     "@vitejs/plugin-react": "^5.1.1",
     "@vitest/ui": "^5.0.2",
     "eslint": "^9.39.1",
@@ -53,6 +51,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
+    "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.0.2"
   }
 }

@@ -1,7 +1,70 @@
 .graphPage {
+  display: flex;
+  flex-direction: column;
+  background: var(--app-bg);
+  height: 100%;
+  min-height: 0;
+}
+
+.graphToolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--app-border);
+  flex-shrink: 0;
+}
+
+.graphSearchWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 220px;
+  max-width: 360px;
+}
+
+.graphSearchIcon {
+  position: absolute;
+  left: 12px;
+  width: 15px;
+  height: 15px;
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+.graphSearchInput {
+  padding-left: 34px;
+}
+
+.graphFilterSelect {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.graphEmptyState {
+  grid-column: 1 / -1;
+  padding: 56px 24px;
+  text-align: center;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+}
+
+.graphGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: var(--app-bg);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .graphPanel {
@@ -22,7 +85,7 @@
 }
 
 .graphPanelHeader {
-  padding: 10px 6px 0 14px;
+  padding: 9px 10px 9px 14px;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -32,6 +95,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Boxed off from the chart body below, so the title reads as its own
+     strip rather than floating text over the plot. */
+  background: var(--app-surface-strong);
+  border-bottom: 1px solid var(--app-border);
 }
 
 .graphPanelExpand {
@@ -80,7 +147,7 @@
 /* @container reacts to .appShellContent's actual width, not the raw window
    — see app-shell.css */
 @container (max-width: 1024px) {
-  .graphPage {
+  .graphGrid {
     grid-template-columns: 1fr;
   }
 

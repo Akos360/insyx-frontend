@@ -145,8 +145,12 @@
 
 .searchTable {
   width: 100%;
-  min-width: 720px;
+  /* No min-width — these pages must never scroll horizontally (table-layout:fixed
+     plus every column below either being narrow/fixed-width or ellipsis-safe
+     means the table can always shrink to fit its container, down to Title
+     itself getting tight rather than forcing an overflow). */
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .searchThCheck {
@@ -177,7 +181,54 @@
 }
 
 .searchThTitle {
-  width: 36%;
+  /* No fixed width — with table-layout:fixed, this is the one column left
+     unsized, so it absorbs whatever Field/Year/Citations/OA's fixed widths
+     below don't use. Longer titles get maximum room before the row's own
+     ellipsis truncation kicks in. */
+}
+
+.searchThField {
+  width: 170px;
+}
+
+.searchThYear {
+  width: 72px;
+}
+
+.searchThCitations {
+  width: 100px;
+}
+
+.searchThOA {
+  width: 88px;
+}
+
+/* Authors page: Country leads the row (before Name), set apart from it with
+   a vertical divider rather than just column spacing. */
+.searchThCountry {
+  width: 84px;
+}
+
+.searchThCountrySep,
+.searchTdCountrySep {
+  border-right: 1px solid var(--border);
+}
+
+/* Generic single-count column — Authors' "Papers", Institutions' "Works"
+   and "Authors". */
+.searchThCount {
+  width: 80px;
+}
+
+.searchThHIndex,
+.searchTdHIndex {
+  /* h-index is the last column — a bit of extra breathing room before the
+     table's trailing edge, instead of it sitting flush against it. */
+  padding-right: 28px;
+}
+
+.searchThHIndex {
+  width: 84px;
 }
 
 .searchThNum {
@@ -197,6 +248,22 @@
 }
 
 .searchSortActive {
+  color: var(--accent-text);
+}
+
+/* Multi-column sort: wraps the icon + an optional priority number so a
+   column can show "this is sort #2" when more than one column is active. */
+.searchSortWrap {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.searchSortBadge {
+  margin-left: 2px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
   color: var(--accent-text);
 }
 
@@ -262,9 +329,38 @@
   max-width: 420px;
 }
 
+/* Only rendered when the search term matched the abstract rather than the
+   title — shows why a result matched even though nothing visibly matches
+   in the title/author line above it. */
+.searchRowSnippet {
+  margin-top: 2px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 420px;
+}
+
 .searchTdNum {
   text-align: right;
   color: var(--text-2);
+  /* These columns are now fixed/narrow so the table never has to scroll
+     horizontally — a value too wide for its column (e.g. a big citation
+     count) shrinks to an ellipsis instead of spilling into the next cell. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Open vs Closed otherwise render at very different pill widths ("Open" vs
+   "Closed" is already close, but a fixed width guarantees it rather than
+   leaving it to each label's own text length) — a fixed width keeps the OA
+   column visually stable, and centers either label within it. */
+.searchOaTag {
+  width: 56px;
+  justify-content: center;
 }
 
 /* ─── Pagination ──────────────────────────────────────────────────────── */
@@ -272,12 +368,38 @@
 .searchPagination {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 14px;
   height: 52px;
   padding: 0 16px;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
+}
+
+.searchPaginationNav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 auto;
+}
+
+.searchPageSizeControl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.searchPageSizeSelect {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 12.5px;
 }
 
 .searchPaginationRange,
@@ -287,8 +409,8 @@
   white-space: nowrap;
 }
 
-/* Half-screen/tablet tier: the full 6-column table (checkbox, Title, Year,
-   Field, Citations, OA) no longer fits without horizontal scroll — drop the
+/* Half-screen/tablet tier: the full 6-column table (checkbox, Title, Field,
+   Year, Citations, OA) no longer fits without horizontal scroll — drop the
    two least-critical columns (Field, OA) rather than force a scrollbar,
    matching the reduced Title/Year/Citations set the Overview search preview
    already uses at an even smaller scale. @container (not @media): this needs
@@ -299,14 +421,11 @@
     display: none;
   }
 
-  .searchTable {
-    min-width: 0;
-  }
-
   /* .searchRowSub's fixed max-width: 420px (below) is sized for desktop and
      doesn't shrink with the container — it was still forcing the Title
      column wide even with the columns above hidden. Let it wrap instead. */
-  .searchRowSub {
+  .searchRowSub,
+  .searchRowSnippet {
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
@@ -327,4 +446,32 @@
   .searchFieldGrow {
     min-width: 100%;
   }
+}
+
+/* ─── Authors page: name cell (avatar + name/ORCID) ──────────────────────── */
+
+.authorsNameCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Same placeholder icon for every author — not a real photo, just a
+   consistent visual anchor at the start of the name. */
+.authorsAvatar {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+}
+
+.authorsNameCellText {
+  min-width: 0;
 }

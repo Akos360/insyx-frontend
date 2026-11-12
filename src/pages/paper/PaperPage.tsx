@@ -19,6 +19,8 @@ import BackLink from "../../components/common/BackLink";
 import { countryFlag, getWork, getWorkCoAuthors, getWorkTopics } from "../../api/works";
 import { humanizeAuthors } from "../../utils/authorNames";
 import { fieldColorVar } from "../../utils/fieldColor";
+import { buildBibTeX } from "../../utils/bibtex";
+import { doiUrl, bareDoi } from "../../utils/doi";
 import "./paper-page.css";
 
 function humanizeSlug(value: string | null): string | null {
@@ -48,7 +50,10 @@ export default function PaperPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { data: paper, isLoading, isError } = useQuery({
+  // isPending, not isLoading — under PersistQueryClientProvider, isLoading is
+  // falsely false during the IndexedDB-restore window (pending but not yet
+  // fetching), which would flash the "not found" state on every hard refresh.
+  const { data: paper, isPending, isError } = useQuery({
     queryKey: ["works", "detail", id],
     queryFn: () => getWork(id!),
     enabled: !!id,
@@ -74,10 +79,69 @@ export default function PaperPage() {
     return [...coAuthors].sort((a, b) => key(a).localeCompare(key(b)));
   }, [coAuthors, authorSort]);
 
-  if (isLoading) {
+  const [showCite, setShowCite] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const bibtex = useMemo(() => (paper ? buildBibTeX(paper) : ""), [paper]);
+
+  async function copyBibTeX() {
+    try {
+      await navigator.clipboard.writeText(bibtex);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard API can be blocked (permissions/non-secure context) — the
+      // BibTeX is still shown on screen to copy by hand.
+    }
+  }
+
+  function downloadBibTeX() {
+    const blob = new Blob([bibtex], { type: "application/x-bibtex" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${paper?.id ?? "citation"}.bib`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  if (isPending) {
     return (
       <main className="paperPage">
-        <div className="paperPageStatus">Loading…</div>
+        <BackLink label="Back" />
+        <header className="paperHeader">
+          <div className="paperTagRow">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <span key={i} className="uiSkel" style={{ height: 24, width: 80, borderRadius: 999 }} />
+            ))}
+          </div>
+          <span className="uiSkel" style={{ display: "block", height: 28, width: "70%" }} />
+          <span className="uiSkel" style={{ display: "block", height: 13, width: 200 }} />
+        </header>
+        <div className="paperStatsRow">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <span key={i} className="uiSkel" style={{ height: 16, width: 90, borderRadius: 4 }} />
+          ))}
+        </div>
+        <div className="paperLayout">
+          <div className="paperMain">
+            <section className="uiCard paperCard">
+              <div className="paperCardBody">
+                <span className="uiSkel" style={{ display: "block", height: 13, width: "100%", marginBottom: 8 }} />
+                <span className="uiSkel" style={{ display: "block", height: 13, width: "95%", marginBottom: 8 }} />
+                <span className="uiSkel" style={{ display: "block", height: 13, width: "60%" }} />
+              </div>
+            </section>
+          </div>
+          <aside className="paperSide">
+            <section className="uiCard paperCard">
+              <div className="paperCardBody paperKvList">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <span key={i} className="uiSkel" style={{ display: "block", height: 13, width: "100%", marginBottom: 10 }} />
+                ))}
+              </div>
+            </section>
+          </aside>
+        </div>
       </main>
     );
   }
@@ -133,11 +197,11 @@ export default function PaperPage() {
               <span className="paperBylineDot">·</span>
               <a
                 className="paperDoiLink"
-                href={`https://doi.org/${paper.doi}`}
+                href={doiUrl(paper.doi)}
                 target="_blank"
                 rel="noreferrer"
               >
-                doi.org/{paper.doi}
+                doi.org/{bareDoi(paper.doi)}
               </a>
             </>
           )}
@@ -346,6 +410,39 @@ export default function PaperPage() {
               </div>
             </section>
           )}
+
+          <section className="uiCard paperCard">
+            <div className="uiCardHead">
+              <div className="uiCardTitle">
+                <LuQuote aria-hidden="true" />
+                <span>Cite this paper</span>
+              </div>
+            </div>
+            <div className="paperCardBody" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <button
+                type="button"
+                className="uiBtn uiBtnSecondary"
+                onClick={() => setShowCite((v) => !v)}
+                aria-expanded={showCite}
+              >
+                <LuQuote aria-hidden="true" />
+                <span>{showCite ? "Hide BibTeX" : "Show BibTeX"}</span>
+              </button>
+              {showCite && (
+                <>
+                  <pre className="paperBibtexBox">{bibtex}</pre>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button type="button" className="uiBtn uiBtnSecondary" onClick={copyBibTeX}>
+                      <span>{copied ? "Copied!" : "Copy"}</span>
+                    </button>
+                    <button type="button" className="uiBtn uiBtnSecondary" onClick={downloadBibTeX}>
+                      <span>Download .bib</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
 
           {institutions.length > 0 && (
             <section className="uiCard paperCard">

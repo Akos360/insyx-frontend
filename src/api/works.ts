@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { YearStat, FieldStat, ScatterPoint, OaYearStat, FieldPeriodStat } from "../charts/buildChartOption";
+import type { YearStat, FieldStat, TypeStat, ScatterPoint, OaYearStat, TypePeriodStat, ApcStat } from "../charts/buildChartOption";
 
 export type Work = {
   id: string;
@@ -11,6 +11,8 @@ export type Work = {
   authors: string;
   is_oa: boolean;
   source_name: string;
+  /** Set only when actively searching and the term hit the abstract — see WorksService.findAll. */
+  matchSnippet?: string | null;
 };
 
 export type WorkInstitution = {
@@ -71,8 +73,10 @@ export type WorksQuery = {
   is_oa?: boolean;
   limit?: number;
   offset?: number;
-  sortBy?: "title" | "authors" | "publicationYear" | "field" | "citedByCount";
-  sortDir?: "asc" | "desc";
+  /** Comma-separated for multi-column sort, e.g. "field,citedByCount". */
+  sortBy?: string;
+  /** Comma-separated, positionally paired with sortBy, e.g. "asc,desc". */
+  sortDir?: string;
 };
 
 export async function searchWorks(query: WorksQuery): Promise<WorksPage> {
@@ -129,6 +133,7 @@ export type AuthorListItem = {
   country_code: string | null;
   works_count: number;
   cited_by_count: number;
+  hIndex: number;
 };
 
 export type AuthorsPage = {
@@ -140,14 +145,34 @@ export type AuthorsPage = {
 
 export type AuthorsQuery = {
   search?: string;
+  country?: string;
+  hasOrcid?: boolean;
+  minWorks?: number;
   limit?: number;
   offset?: number;
-  sortBy?: "displayName" | "worksCount" | "citedByCount";
-  sortDir?: "asc" | "desc";
+  /** Comma-separated for multi-column sort, e.g. "country,citedByCount". */
+  sortBy?: string;
+  /** Comma-separated, positionally paired with sortBy, e.g. "asc,desc". */
+  sortDir?: string;
 };
 
 export async function searchAuthors(query: AuthorsQuery): Promise<AuthorsPage> {
   const res = await api.get<AuthorsPage>("/works/authors", { params: query });
+  return res.data;
+}
+
+/** Builds a direct download link for /works/authors/export — a plain navigation, not an axios call. */
+export function buildExportAuthorsCsvUrl(query: Omit<AuthorsQuery, "limit" | "offset">): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  }
+  const qs = params.toString();
+  return `${api.defaults.baseURL}/works/authors/export${qs ? `?${qs}` : ""}`;
+}
+
+export async function getAuthorCountries(): Promise<string[]> {
+  const res = await api.get<string[]>("/works/authors/countries");
   return res.data;
 }
 
@@ -168,11 +193,26 @@ export type AuthorDetail = {
   orcid: string | null;
   countryCode: string | null;
   firstInstitutionName: string | null;
+  hIndex: number;
+  // Computed server-side from the author's *entire* paper list, not just
+  // the page in `papers` below — `papers` only holds one page.
+  totalCitations: number;
+  fields: string[];
+  yearsActive: { min: number; max: number } | null;
+  papersByYear: { year: number; count: number }[];
+  topCitedPapers: { id: string; title: string; cited_by_count: number }[];
+  /** Total papers the author has, independent of how many `papers` holds on this page. */
+  papersTotal: number;
+  limit: number;
+  offset: number;
   papers: AuthorPaper[];
 };
 
-export async function getAuthor(authorId: string): Promise<AuthorDetail | null> {
-  const res = await api.get<AuthorDetail | null>(`/works/authors/${authorId}`);
+export async function getAuthor(
+  authorId: string,
+  params: { limit?: number; offset?: number } = {},
+): Promise<AuthorDetail | null> {
+  const res = await api.get<AuthorDetail | null>(`/works/authors/${authorId}`, { params });
   return res.data;
 }
 
@@ -237,8 +277,18 @@ export async function searchInstitutions(q: string): Promise<InstitutionSummary[
   return res.data;
 }
 
-export async function getInstitutionWorks(id: string): Promise<Work[]> {
-  const res = await api.get<Work[]>(`/works/institutions/${id}/works`);
+export type InstitutionWorksPage = {
+  items: Work[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+export async function getInstitutionWorks(
+  id: string,
+  params: { limit?: number; offset?: number } = {},
+): Promise<InstitutionWorksPage> {
+  const res = await api.get<InstitutionWorksPage>(`/works/institutions/${id}/works`, { params });
   return res.data;
 }
 
@@ -261,15 +311,29 @@ export type InstitutionsPage = {
 
 export type InstitutionsQuery = {
   search?: string;
+  country?: string;
+  minWorks?: number;
   limit?: number;
   offset?: number;
-  sortBy?: "name" | "worksCount" | "citedByCount";
-  sortDir?: "asc" | "desc";
+  /** Comma-separated for multi-column sort, e.g. "country,worksCount". */
+  sortBy?: string;
+  /** Comma-separated, positionally paired with sortBy, e.g. "asc,desc". */
+  sortDir?: string;
 };
 
 export async function listInstitutions(query: InstitutionsQuery): Promise<InstitutionsPage> {
   const res = await api.get<InstitutionsPage>("/works/institutions", { params: query });
   return res.data;
+}
+
+/** Builds a direct download link for /works/institutions/export — a plain navigation, not an axios call. */
+export function buildExportInstitutionsCsvUrl(query: Omit<InstitutionsQuery, "limit" | "offset">): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  }
+  const qs = params.toString();
+  return `${api.defaults.baseURL}/works/institutions/export${qs ? `?${qs}` : ""}`;
 }
 
 export type InstitutionDetail = {
@@ -299,8 +363,18 @@ export type InstitutionAuthor = {
   cited_by_count: number;
 };
 
-export async function getInstitutionAuthors(id: string): Promise<InstitutionAuthor[]> {
-  const res = await api.get<InstitutionAuthor[]>(`/works/institutions/${id}/authors`);
+export type InstitutionAuthorsPage = {
+  items: InstitutionAuthor[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+export async function getInstitutionAuthors(
+  id: string,
+  params: { limit?: number; offset?: number } = {},
+): Promise<InstitutionAuthorsPage> {
+  const res = await api.get<InstitutionAuthorsPage>(`/works/institutions/${id}/authors`, { params });
   return res.data;
 }
 
@@ -310,6 +384,8 @@ export type ChartFilters = {
   domain?: string;
   field?: string;
   is_oa?: boolean;
+  /** "YYYY-YYYY,YYYY-YYYY,..." — only meaningful for getStatsTypePeriod. */
+  periods?: string;
 };
 
 export async function getStatsByYear(filters: ChartFilters = {}): Promise<YearStat[]> {
@@ -319,6 +395,11 @@ export async function getStatsByYear(filters: ChartFilters = {}): Promise<YearSt
 
 export async function getStatsByField(filters: ChartFilters = {}): Promise<FieldStat[]> {
   const res = await api.get<FieldStat[]>("/works/stats/by-field", { params: filters });
+  return res.data;
+}
+
+export async function getStatsByType(filters: ChartFilters = {}): Promise<TypeStat[]> {
+  const res = await api.get<TypeStat[]>("/works/stats/by-type", { params: filters });
   return res.data;
 }
 
@@ -332,7 +413,12 @@ export async function getStatsOaByYear(filters: ChartFilters = {}): Promise<OaYe
   return res.data;
 }
 
-export async function getStatsFieldPeriod(filters: ChartFilters = {}): Promise<FieldPeriodStat[]> {
-  const res = await api.get<FieldPeriodStat[]>("/works/stats/field-period", { params: filters });
+export async function getStatsTypePeriod(filters: ChartFilters = {}): Promise<TypePeriodStat[]> {
+  const res = await api.get<TypePeriodStat[]>("/works/stats/type-period", { params: filters });
+  return res.data;
+}
+
+export async function getStatsApc(filters: ChartFilters = {}): Promise<ApcStat[]> {
+  const res = await api.get<ApcStat[]>("/works/stats/apc", { params: filters });
   return res.data;
 }
